@@ -4,7 +4,6 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests/integration',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -17,7 +16,13 @@ export default defineConfig({
 
   projects: [
     {
-      name: 'chromium',
+      name: 'integration',
+      testDir: './tests/integration',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'e2e',
+      testDir: './tests/e2e',
       use: { ...devices['Desktop Chrome'] },
     },
   ],

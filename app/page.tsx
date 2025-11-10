@@ -230,6 +230,7 @@ export default function DashboardPage() {
               onClick={handleProcessData}
               disabled={loading}
               size="default"
+              data-testid="process-data-btn"
             >
               {loading ? "Processing..." : "Process Data"}
             </Button>
@@ -238,6 +239,7 @@ export default function DashboardPage() {
               disabled={loading || statistics.approved === 0}
               variant="outline"
               size="default"
+              data-testid="export-btn"
             >
               Export to Sheets
             </Button>
@@ -281,7 +283,7 @@ export default function DashboardPage() {
                     setFilterStatus(value as ExtractionStatus | "all")
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="filter-status-select">
                     <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent>
@@ -315,7 +317,7 @@ export default function DashboardPage() {
                     setFilterSource(value as SourceType | "all")
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="filter-source-select">
                     <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent>
@@ -335,6 +337,7 @@ export default function DashboardPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="pl-9"
+                    data-testid="search-input"
                   />
                 </div>
               </div>

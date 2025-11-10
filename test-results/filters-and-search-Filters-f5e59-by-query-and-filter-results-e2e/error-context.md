@@ -1,0 +1,81 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - heading "Data Extraction Dashboard" [level=1] [ref=e6]
+        - paragraph [ref=e7]: Human-in-the-loop data extraction and approval workflow
+      - generic [ref=e8]:
+        - button "Process Data" [ref=e9]
+        - button "Export to Sheets" [ref=e10]
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - heading "Total Extractions" [level=3] [ref=e14]
+          - img [ref=e15]
+        - generic [ref=e18]:
+          - generic [ref=e19]: "1900"
+          - paragraph [ref=e20]: "Forms: 380 | Emails: 760 | Invoices: 760"
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Pending Approval" [level=3] [ref=e23]
+          - img [ref=e24]
+        - generic [ref=e27]:
+          - generic [ref=e28]: "218"
+          - paragraph [ref=e29]: Awaiting review
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - heading "Approved" [level=3] [ref=e32]
+          - img [ref=e33]
+        - generic [ref=e36]:
+          - generic [ref=e37]: "28"
+          - paragraph [ref=e38]: Ready to export
+      - generic [ref=e39]:
+        - generic [ref=e40]:
+          - heading "Exported" [level=3] [ref=e41]
+          - img [ref=e42]
+        - generic [ref=e45]:
+          - generic [ref=e46]: "0"
+          - paragraph [ref=e47]: Sent to Google Sheets
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - heading "Filters" [level=3] [ref=e50]
+        - paragraph [ref=e51]: Filter extraction records by status, source type, or search term
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - text: Status
+          - combobox [ref=e55]:
+            - generic: All
+            - img [ref=e56]
+        - generic [ref=e58]:
+          - text: Source Type
+          - combobox [ref=e59]:
+            - generic: All
+            - img [ref=e60]
+        - generic [ref=e62]:
+          - text: Search
+          - generic [ref=e63]:
+            - img [ref=e64]
+            - textbox "Search records..." [active] [ref=e67]: John
+    - generic [ref=e68]:
+      - generic [ref=e69]:
+        - heading "Extractions" [level=3] [ref=e70]
+        - paragraph [ref=e71]: 0 records found
+      - alert [ref=e73]:
+        - generic [ref=e74]: No extraction records found. Click "Process Data" to start extracting data from files.
+  - region "Notifications alt+T"
+  - generic [ref=e79] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e80]:
+      - img [ref=e81]
+    - generic [ref=e84]:
+      - button "Open issues overlay" [ref=e85]:
+        - generic [ref=e86]:
+          - generic [ref=e87]: "0"
+          - generic [ref=e88]: "1"
+        - generic [ref=e89]: Issue
+      - button "Collapse issues badge" [ref=e90]:
+        - img [ref=e91]
+  - alert [ref=e93]
+```

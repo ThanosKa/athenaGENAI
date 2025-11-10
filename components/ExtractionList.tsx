@@ -44,7 +44,7 @@ export function ExtractionList({
   }
 
   return (
-    <div className="rounded-md border border-border">
+    <div className="rounded-md border border-border" data-testid="extraction-list">
       <Table>
         <TableHeader>
           <TableRow>
@@ -59,7 +59,7 @@ export function ExtractionList({
         </TableHeader>
         <TableBody>
           {records.map((record) => (
-            <TableRow key={record.id}>
+            <TableRow key={record.id} data-testid={`record-row-${record.id}`}>
               <TableCell>
                 <SourceTypeBadge type={record.sourceType} />
               </TableCell>
@@ -70,7 +70,7 @@ export function ExtractionList({
                 {record.sourceFile}
               </TableCell>
               <TableCell>
-                <StatusBadge status={record.status} />
+                <StatusBadge status={record.status} data-testid={`status-badge-${record.id}`} />
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 {new Date(record.extractedAt).toLocaleString()}
@@ -92,25 +92,26 @@ export function ExtractionList({
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-testid={`actions-menu-${record.id}`}>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onView(record.id)}>
+                    <DropdownMenuItem onClick={() => onView(record.id)} data-testid={`view-record-btn-${record.id}`}>
                       <Eye className="h-4 w-4 mr-2" />
                       View
                     </DropdownMenuItem>
                     {(record.status === ExtractionStatus.PENDING ||
                       record.status === ExtractionStatus.EDITED) && (
                       <>
-                        <DropdownMenuItem onClick={() => onEdit(record.id)}>
+                        <DropdownMenuItem onClick={() => onEdit(record.id)} data-testid={`edit-record-btn-${record.id}`}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onApprove(record.id)}
                           className="text-green-500 focus:text-green-600"
+                          data-testid={`approve-record-btn-${record.id}`}
                         >
                           <Check className="h-4 w-4 mr-2" />
                           Approve
@@ -118,6 +119,7 @@ export function ExtractionList({
                         <DropdownMenuItem
                           onClick={() => onReject(record.id)}
                           className="text-destructive"
+                          data-testid={`reject-record-btn-${record.id}`}
                         >
                           <X className="h-4 w-4 mr-2" />
                           Reject
@@ -152,7 +154,7 @@ function SourceTypeBadge({ type }: { type: SourceType }) {
   );
 }
 
-function StatusBadge({ status }: { status: ExtractionStatus }) {
+function StatusBadge({ status, ...props }: { status: ExtractionStatus } & React.ComponentProps<typeof Badge>) {
   const variants = {
     [ExtractionStatus.PENDING]: { label: 'Pending', variant: 'warning' as const },
     [ExtractionStatus.APPROVED]: { label: 'Approved', variant: 'success' as const },
@@ -163,7 +165,7 @@ function StatusBadge({ status }: { status: ExtractionStatus }) {
   };
 
   const config = variants[status];
-  return <Badge variant={config.variant}>{config.label}</Badge>;
+  return <Badge variant={config.variant} {...props}>{config.label}</Badge>;
 }
 
 function getDataPreview(record: ExtractionRecord): string {

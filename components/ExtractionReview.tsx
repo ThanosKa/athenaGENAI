@@ -59,7 +59,7 @@ export function ExtractionReview({
 
   return (
     <Dialog open={true} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="extraction-dialog">
         <DialogHeader>
           <DialogTitle>Extraction Review</DialogTitle>
           <DialogDescription>
@@ -70,7 +70,7 @@ export function ExtractionReview({
         <div className="space-y-4">
           {/* Warnings */}
           {record.warnings.length > 0 && (
-            <Alert variant="warning">
+            <Alert variant="warning" data-testid="warnings-alert">
               <AlertTitle>Warnings</AlertTitle>
               <AlertDescription>
                 <ul className="list-disc list-inside space-y-1">
@@ -84,7 +84,7 @@ export function ExtractionReview({
 
           {/* Error */}
           {record.error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" data-testid="error-alert">
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{record.error}</AlertDescription>
             </Alert>
@@ -120,18 +120,18 @@ export function ExtractionReview({
           <div className="flex gap-2">
             {isEditing ? (
               <>
-                <Button onClick={handleSave}>
+                <Button onClick={handleSave} data-testid="save-edit-btn">
                   Save Changes
                 </Button>
                 <Button variant="outline" onClick={() => {
                   setEditedData(record.data);
                   setIsEditing(false);
-                }}>
+                }} data-testid="cancel-edit-btn">
                   Cancel
                 </Button>
               </>
             ) : (
-              <Button variant="outline" onClick={() => setIsEditing(true)}>
+              <Button variant="outline" onClick={() => setIsEditing(true)} data-testid="enable-edit-btn">
                 Edit
               </Button>
             )}
@@ -141,11 +141,12 @@ export function ExtractionReview({
               variant="default"
               onClick={onApprove}
               className="bg-green-500 hover:bg-green-600 text-white"
+              data-testid="approve-btn"
             >
               <Check className="h-4 w-4 mr-2" />
               Approve
             </Button>
-            <Button variant="destructive" onClick={onReject}>
+            <Button variant="destructive" onClick={onReject} data-testid="reject-btn">
               <X className="h-4 w-4 mr-2" />
               Reject
             </Button>
@@ -173,6 +174,7 @@ function FormDataFields({
           value={data.fullName}
           onChange={(e) => onChange({ ...data, fullName: e.target.value })}
           disabled={!isEditing}
+          data-testid="field-fullName"
         />
       </div>
       <div className="space-y-2">
