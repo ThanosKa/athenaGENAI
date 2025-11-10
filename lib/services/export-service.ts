@@ -51,6 +51,18 @@ export class ExportService {
     createNew?: boolean;
   } = {}): Promise<{ success: boolean; spreadsheetId?: string; error?: string }> {
     try {
+      // Get all approved records first - check before initializing Google Sheets
+      const approvedRecords = storageService.getRecords({
+        status: ExtractionStatus.APPROVED,
+      });
+
+      if (approvedRecords.length === 0) {
+        return {
+          success: false,
+          error: 'No approved records to export',
+        };
+      }
+
       // Initialize if needed
       if (!this.isInitialized) {
         await this.initialize();
@@ -64,18 +76,6 @@ export class ExportService {
         });
       } else {
         googleSheetsClient.setSpreadsheetId(targetSpreadsheetId);
-      }
-
-      // Get all approved records
-      const approvedRecords = storageService.getRecords({
-        status: ExtractionStatus.APPROVED,
-      });
-
-      if (approvedRecords.length === 0) {
-        return {
-          success: false,
-          error: 'No approved records to export',
-        };
       }
 
       // Separate records by type
