@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ExtractionRecord,
   SourceType,
@@ -40,13 +40,25 @@ export function ExtractionReview({
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState(record.data);
 
+  // Reset editing state when record changes
+  useEffect(() => {
+    setIsEditing(false);
+    setEditedData(record.data);
+  }, [record.id]);
+
   const handleSave = () => {
     onSaveEdit(editedData);
     setIsEditing(false);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={true} onOpenChange={onClose}>
+    <Dialog open={true} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Extraction Review</DialogTitle>
@@ -58,9 +70,9 @@ export function ExtractionReview({
         <div className="space-y-4">
           {/* Warnings */}
           {record.warnings.length > 0 && (
-            <Alert className="border-amber-200 bg-amber-50">
-              <AlertTitle className="text-amber-800">Warnings</AlertTitle>
-              <AlertDescription className="text-amber-700">
+            <Alert variant="warning">
+              <AlertTitle>Warnings</AlertTitle>
+              <AlertDescription>
                 <ul className="list-disc list-inside space-y-1">
                   {record.warnings.map((warning, idx) => (
                     <li key={idx}>{warning}</li>

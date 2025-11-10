@@ -110,7 +110,7 @@ export function ExtractionList({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onApprove(record.id)}
-                          className="text-[#22C55E]"
+                          className="text-green-500 focus:text-green-600"
                         >
                           <Check className="h-4 w-4 mr-2" />
                           Approve
