@@ -26,12 +26,14 @@ import { Check, X } from "lucide-react";
 
 export function ExtractionReview({
   record,
+  initialEditMode = false,
   onApprove,
   onReject,
   onSaveEdit,
   onClose,
 }: {
   record: ExtractionRecord;
+  initialEditMode?: boolean;
   onApprove: () => void;
   onReject: () => void;
   onSaveEdit: (
@@ -41,14 +43,14 @@ export function ExtractionReview({
   ) => void;
   onClose: () => void;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(initialEditMode);
   const [editedData, setEditedData] = useState(record.data);
 
   // Reset editing state when record changes
   useEffect(() => {
-    setIsEditing(false);
+    setIsEditing(initialEditMode);
     setEditedData(record.data);
-  }, [record.id]);
+  }, [record.id, initialEditMode]);
 
   const handleSave = () => {
     onSaveEdit(editedData);
@@ -122,52 +124,45 @@ export function ExtractionReview({
         </div>
 
         <DialogFooter className="flex justify-between sm:justify-between">
-          <div className="flex gap-2">
-            {isEditing ? (
-              <>
-                <Button onClick={handleSave} data-testid="save-edit-btn">
-                  Save Changes
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setEditedData(record.data);
-                    setIsEditing(false);
-                  }}
-                  data-testid="cancel-edit-btn"
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
+          {isEditing ? (
+            // Edit mode: Show Save Changes and Cancel buttons only
+            <div className="flex gap-2">
+              <Button onClick={handleSave} data-testid="save-edit-btn">
+                Save Changes
+              </Button>
               <Button
                 variant="outline"
-                onClick={() => setIsEditing(true)}
-                data-testid="enable-edit-btn"
+                onClick={() => {
+                  setEditedData(record.data);
+                  onClose();
+                }}
+                data-testid="cancel-edit-btn"
               >
-                Edit
+                Cancel
               </Button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="default"
-              onClick={onApprove}
-              className="bg-green-500 hover:bg-green-600 text-white"
-              data-testid="approve-btn"
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Approve
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={onReject}
-              data-testid="reject-btn"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Reject
-            </Button>
-          </div>
+            </div>
+          ) : (
+            // View mode: Show Approve/Reject buttons
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                onClick={onApprove}
+                className="bg-green-500 hover:bg-green-600 text-white"
+                data-testid="approve-btn"
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Approve
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={onReject}
+                data-testid="reject-btn"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Reject
+              </Button>
+            </div>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

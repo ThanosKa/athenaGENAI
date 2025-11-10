@@ -45,6 +45,7 @@ export default function DashboardPage() {
   const [selectedRecord, setSelectedRecord] = useState<ExtractionRecord | null>(
     null
   );
+  const [initialEditMode, setInitialEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<ExtractionStatus | "all">(
@@ -204,10 +205,20 @@ export default function DashboardPage() {
     }
   };
 
-  // View record
+  // View record (read-only)
   const handleView = (id: string) => {
     const record = records.find((r) => r.id === id);
     if (record) {
+      setInitialEditMode(false);
+      setSelectedRecord(record);
+    }
+  };
+
+  // Edit record (opens in edit mode)
+  const handleEdit = (id: string) => {
+    const record = records.find((r) => r.id === id);
+    if (record) {
+      setInitialEditMode(true);
       setSelectedRecord(record);
     }
   };
@@ -349,12 +360,16 @@ export default function DashboardPage() {
         {selectedRecord && (
           <ExtractionReview
             record={selectedRecord}
+            initialEditMode={initialEditMode}
             onApprove={() => handleApprove(selectedRecord.id)}
             onReject={() => handleReject(selectedRecord.id)}
             onSaveEdit={(updatedData) =>
               handleSaveEdit(selectedRecord.id, updatedData)
             }
-            onClose={() => setSelectedRecord(null)}
+            onClose={() => {
+              setSelectedRecord(null);
+              setInitialEditMode(false);
+            }}
           />
         )}
 
@@ -378,7 +393,7 @@ export default function DashboardPage() {
                 records={records}
                 onApprove={handleApprove}
                 onReject={handleReject}
-                onEdit={handleView}
+                onEdit={handleEdit}
                 onView={handleView}
               />
             )}
