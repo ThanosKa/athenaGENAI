@@ -21,7 +21,9 @@ export async function extractEmailData({
 
     const from = parsed.from?.text || '';
     const fromEmail = parsed.from?.value[0]?.address || '';
-    const to = parsed.to?.text || '';
+    const to = Array.isArray(parsed.to) 
+      ? parsed.to.map(addr => addr.text || '').join(', ')
+      : parsed.to?.text || '';
     const subject = parsed.subject || '';
     const date = parsed.date?.toISOString() || new Date().toISOString();
     const bodyText = parsed.text || '';

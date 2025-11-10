@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   ExtractionRecord,
   SourceType,
   ExtractedFormData,
   ExtractedEmailData,
   ExtractedInvoiceData,
-} from '@/types/data';
+} from "@/types/data";
 import {
   Dialog,
   DialogContent,
@@ -15,14 +15,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Check, X } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Check, X } from "lucide-react";
 
 export function ExtractionReview({
   record,
@@ -34,7 +34,11 @@ export function ExtractionReview({
   record: ExtractionRecord;
   onApprove: () => void;
   onReject: () => void;
-  onSaveEdit: (updatedData: Partial<ExtractedFormData | ExtractedEmailData | ExtractedInvoiceData>) => void;
+  onSaveEdit: (
+    updatedData: Partial<
+      ExtractedFormData | ExtractedEmailData | ExtractedInvoiceData
+    >
+  ) => void;
   onClose: () => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -59,14 +63,15 @@ export function ExtractionReview({
 
   return (
     <Dialog open={true} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="extraction-dialog">
+      <DialogContent
+        className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        data-testid="extraction-dialog"
+      >
         <DialogHeader>
           <DialogTitle>Extraction Review</DialogTitle>
-          <DialogDescription>
-            {record.sourceFile}
-          </DialogDescription>
+          <DialogDescription>{record.sourceFile}</DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Warnings */}
           {record.warnings.length > 0 && (
@@ -123,15 +128,23 @@ export function ExtractionReview({
                 <Button onClick={handleSave} data-testid="save-edit-btn">
                   Save Changes
                 </Button>
-                <Button variant="outline" onClick={() => {
-                  setEditedData(record.data);
-                  setIsEditing(false);
-                }} data-testid="cancel-edit-btn">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditedData(record.data);
+                    setIsEditing(false);
+                  }}
+                  data-testid="cancel-edit-btn"
+                >
                   Cancel
                 </Button>
               </>
             ) : (
-              <Button variant="outline" onClick={() => setIsEditing(true)} data-testid="enable-edit-btn">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(true)}
+                data-testid="enable-edit-btn"
+              >
                 Edit
               </Button>
             )}
@@ -146,7 +159,11 @@ export function ExtractionReview({
               <Check className="h-4 w-4 mr-2" />
               Approve
             </Button>
-            <Button variant="destructive" onClick={onReject} data-testid="reject-btn">
+            <Button
+              variant="destructive"
+              onClick={onReject}
+              data-testid="reject-btn"
+            >
               <X className="h-4 w-4 mr-2" />
               Reject
             </Button>
@@ -231,7 +248,9 @@ function FormDataFields({
         <Label>Submission Date</Label>
         <Input
           value={data.submissionDate}
-          onChange={(e) => onChange({ ...data, submissionDate: e.target.value })}
+          onChange={(e) =>
+            onChange({ ...data, submissionDate: e.target.value })
+          }
           disabled={!isEditing}
         />
       </div>
@@ -252,8 +271,12 @@ function EmailDataFields({
     <div className="grid gap-4 md:grid-cols-2">
       <div className="space-y-2 md:col-span-2">
         <Label>Email Type</Label>
-        <Badge variant={data.emailType === 'client_inquiry' ? 'info' : 'warning'}>
-          {data.emailType === 'client_inquiry' ? 'Client Inquiry' : 'Invoice Notification'}
+        <Badge
+          variant={data.emailType === "client_inquiry" ? "info" : "warning"}
+        >
+          {data.emailType === "client_inquiry"
+            ? "Client Inquiry"
+            : "Invoice Notification"}
         </Badge>
       </div>
       <div className="space-y-2">
@@ -359,7 +382,9 @@ function InvoiceDataFields({
           type="number"
           step="0.01"
           value={data.netAmount}
-          onChange={(e) => onChange({ ...data, netAmount: parseFloat(e.target.value) || 0 })}
+          onChange={(e) =>
+            onChange({ ...data, netAmount: parseFloat(e.target.value) || 0 })
+          }
           disabled={!isEditing}
         />
       </div>
@@ -368,7 +393,9 @@ function InvoiceDataFields({
         <Input
           type="number"
           value={data.vatRate}
-          onChange={(e) => onChange({ ...data, vatRate: parseFloat(e.target.value) || 24 })}
+          onChange={(e) =>
+            onChange({ ...data, vatRate: parseFloat(e.target.value) || 24 })
+          }
           disabled={!isEditing}
         />
       </div>
@@ -378,7 +405,9 @@ function InvoiceDataFields({
           type="number"
           step="0.01"
           value={data.vatAmount}
-          onChange={(e) => onChange({ ...data, vatAmount: parseFloat(e.target.value) || 0 })}
+          onChange={(e) =>
+            onChange({ ...data, vatAmount: parseFloat(e.target.value) || 0 })
+          }
           disabled={!isEditing}
         />
       </div>
@@ -388,11 +417,12 @@ function InvoiceDataFields({
           type="number"
           step="0.01"
           value={data.totalAmount}
-          onChange={(e) => onChange({ ...data, totalAmount: parseFloat(e.target.value) || 0 })}
+          onChange={(e) =>
+            onChange({ ...data, totalAmount: parseFloat(e.target.value) || 0 })
+          }
           disabled={!isEditing}
         />
       </div>
     </div>
   );
 }
-

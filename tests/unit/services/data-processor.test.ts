@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { dataProcessor } from "@/lib/services/data-processor";
 import { storageService } from "@/lib/services/storage";
-import { promises as fs } from "fs";
+import { promises as fs, type PathLike } from "fs";
 import path from "path";
 
 // Mock extractors BEFORE importing
@@ -31,6 +31,25 @@ vi.mock("fs", () => ({
 }));
 
 describe("DataProcessor", () => {
+  // Helper function to create readdir mock implementation
+  // Matches the overload: readdir(path: PathLike): Promise<string[]>
+  const createReaddirMock = (dir: PathLike): Promise<string[]> => {
+    const dirStr = String(dir);
+    if (dirStr.includes("forms")) {
+      return Promise.resolve(["contact_form_1.html", "contact_form_2.html"]);
+    }
+    if (dirStr.includes("emails")) {
+      return Promise.resolve(["email_01.eml", "email_02.eml"]);
+    }
+    if (dirStr.includes("invoices")) {
+      return Promise.resolve([
+        "invoice_TF-2024-001.html",
+        "invoice_TF-2024-002.html",
+      ]);
+    }
+    return Promise.resolve([]);
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     storageService.clear();
@@ -145,22 +164,11 @@ describe("DataProcessor", () => {
   });
 
   it("should process all dummy data files", async () => {
-    // Mock file system
-    vi.mocked(fs.readdir).mockImplementation((dir: string) => {
-      if (dir.includes("forms")) {
-        return Promise.resolve(["contact_form_1.html", "contact_form_2.html"]);
-      }
-      if (dir.includes("emails")) {
-        return Promise.resolve(["email_01.eml", "email_02.eml"]);
-      }
-      if (dir.includes("invoices")) {
-        return Promise.resolve([
-          "invoice_TF-2024-001.html",
-          "invoice_TF-2024-002.html",
-        ]);
-      }
-      return Promise.resolve([]);
-    });
+    // Mock file system - use the helper function
+    // Access the mock directly since fs.readdir is already a vi.fn()
+    (fs.readdir as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      createReaddirMock
+    );
 
     vi.mocked(fs.readFile).mockResolvedValue("file content");
 
@@ -219,13 +227,17 @@ describe("DataProcessor", () => {
 
   it("should handle mixed success/failure scenarios", async () => {
     // Mock file system to return only form files
-    vi.mocked(fs.readdir).mockImplementation((dir: string) => {
-      if (dir.includes("forms")) {
-        return Promise.resolve(["form_1.html", "form_2.html"]);
+    // Access the mock directly since fs.readdir is already a vi.fn()
+    (fs.readdir as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      (dir: PathLike): Promise<string[]> => {
+        const dirStr = String(dir);
+        if (dirStr.includes("forms")) {
+          return Promise.resolve(["form_1.html", "form_2.html"]);
+        }
+        // Return empty arrays for emails and invoices
+        return Promise.resolve([]);
       }
-      // Return empty arrays for emails and invoices
-      return Promise.resolve([]);
-    });
+    );
 
     vi.mocked(extractFormData)
       .mockReturnValueOnce({

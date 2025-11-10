@@ -122,7 +122,7 @@ function validateData(
 ): string | undefined {
   // Basic type checking - ensure we're not changing types
   for (const [key, value] of Object.entries(updatedData)) {
-    const originalValue = (originalData as Record<string, unknown>)[key];
+    const originalValue = (originalData as unknown as Record<string, unknown>)[key];
     if (originalValue !== undefined && typeof originalValue !== typeof value) {
       return `Type mismatch for field ${key}: expected ${typeof originalValue}, got ${typeof value}`;
     }
