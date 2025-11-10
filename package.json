@@ -13,6 +13,8 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:integration": "playwright test",
+    "test:integration:only": "playwright test --project=integration",
+    "test:e2e": "playwright test --project=e2e",
     "test:integration:ui": "playwright test --ui",
     "test:all": "vitest run && playwright test"
   },

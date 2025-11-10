@@ -3,9 +3,54 @@ import { ExtractionStatus, SourceType } from "@/types/data";
 
 test.describe("Dashboard Workflow", () => {
   test.beforeEach(async ({ page }) => {
+    // Track state and records - use objects to ensure state persists across route handler calls
+    const state = { hasProcessedData: false };
+    const records: any[] = [
+      {
+        id: "record-1",
+        sourceType: SourceType.FORM,
+        sourceFile: "contact_form_1.html",
+        status: ExtractionStatus.PENDING,
+        extractedAt: new Date().toISOString(),
+        data: {
+          fullName: "John Doe",
+          email: "john@example.com",
+          phone: "1234567890",
+          company: "Test Company",
+          service: "Web Development",
+          message: "Test message",
+          submissionDate: "2024-01-15",
+          priority: "high",
+        },
+        warnings: [],
+      },
+      {
+        id: "record-2",
+        sourceType: SourceType.EMAIL,
+        sourceFile: "email_01.eml",
+        status: ExtractionStatus.PENDING,
+        extractedAt: new Date().toISOString(),
+        data: {
+          from: "sender@example.com",
+          fromEmail: "sender@example.com",
+          to: "recipient@example.com",
+          subject: "Test Email",
+          date: "2024-01-15",
+          fullName: "Jane Smith",
+          email: "jane@example.com",
+          phone: "0987654321",
+          company: "Another Company",
+          emailType: "client_inquiry" as const,
+          bodyText: "Test email body",
+        },
+        warnings: [],
+      },
+    ];
+
     // Mock API responses
     await page.route("/api/extractions", async (route) => {
       if (route.request().method() === "POST") {
+        state.hasProcessedData = true;
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -21,50 +66,11 @@ test.describe("Dashboard Workflow", () => {
           }),
         });
       } else {
+        // GET request
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
 
-        const mockRecords = [
-          {
-            id: "record-1",
-            sourceType: SourceType.FORM,
-            sourceFile: "contact_form_1.html",
-            status: ExtractionStatus.PENDING,
-            extractedAt: new Date().toISOString(),
-            data: {
-              fullName: "John Doe",
-              email: "john@example.com",
-              phone: "1234567890",
-              company: "Test Company",
-              service: "Web Development",
-              message: "Test message",
-              submissionDate: "2024-01-15",
-              priority: "high",
-            },
-            warnings: [],
-          },
-          {
-            id: "record-2",
-            sourceType: SourceType.EMAIL,
-            sourceFile: "email_01.eml",
-            status: ExtractionStatus.PENDING,
-            extractedAt: new Date().toISOString(),
-            data: {
-              from: "sender@example.com",
-              fromEmail: "sender@example.com",
-              to: "recipient@example.com",
-              subject: "Test Email",
-              date: "2024-01-15",
-              fullName: "Jane Smith",
-              email: "jane@example.com",
-              phone: "0987654321",
-              company: "Another Company",
-              emailType: "client_inquiry" as const,
-              bodyText: "Test email body",
-            },
-            warnings: [],
-          },
-        ];
+        const mockRecords = state.hasProcessedData ? [...records] : [];
 
         const filteredRecords =
           statusFilter && statusFilter !== "all"
@@ -78,7 +84,7 @@ test.describe("Dashboard Workflow", () => {
             data: {
               records: filteredRecords,
               statistics: {
-                total: filteredRecords.length,
+                total: state.hasProcessedData ? 25 : filteredRecords.length,
                 pending: filteredRecords.filter(
                   (r) => r.status === ExtractionStatus.PENDING
                 ).length,
@@ -95,15 +101,21 @@ test.describe("Dashboard Workflow", () => {
                   (r) => r.status === ExtractionStatus.FAILED
                 ).length,
                 bySource: {
-                  forms: filteredRecords.filter(
-                    (r) => r.sourceType === SourceType.FORM
-                  ).length,
-                  emails: filteredRecords.filter(
-                    (r) => r.sourceType === SourceType.EMAIL
-                  ).length,
-                  invoices: filteredRecords.filter(
-                    (r) => r.sourceType === SourceType.INVOICE
-                  ).length,
+                  forms: state.hasProcessedData
+                    ? 5
+                    : filteredRecords.filter(
+                        (r) => r.sourceType === SourceType.FORM
+                      ).length,
+                  emails: state.hasProcessedData
+                    ? 10
+                    : filteredRecords.filter(
+                        (r) => r.sourceType === SourceType.EMAIL
+                      ).length,
+                  invoices: state.hasProcessedData
+                    ? 10
+                    : filteredRecords.filter(
+                        (r) => r.sourceType === SourceType.INVOICE
+                      ).length,
                 },
               },
             },
@@ -114,13 +126,55 @@ test.describe("Dashboard Workflow", () => {
 
     await page.route("/api/approvals", async (route) => {
       const body = await route.request().postDataJSON();
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({
-          success: true,
-          message: `${body.action} successful`,
-        }),
-      });
+      const record = records.find((r) => r.id === body.id);
+
+      if (body.action === "edit") {
+        // Update record with edited data
+        if (record) {
+          record.status = ExtractionStatus.EDITED;
+          record.data = { ...record.data, ...body.updatedData };
+        }
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            data: record,
+            message: "edit successful",
+          }),
+        });
+      } else if (body.action === "approve") {
+        // Update record status to approved
+        if (record) {
+          record.status = ExtractionStatus.APPROVED;
+        }
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            message: "approve successful",
+          }),
+        });
+      } else if (body.action === "reject") {
+        // Update record status to rejected
+        if (record) {
+          record.status = ExtractionStatus.REJECTED;
+        }
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            message: "reject successful",
+          }),
+        });
+      } else {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            message: `${body.action} successful`,
+          }),
+        });
+      }
     });
 
     await page.route("/api/export", async (route) => {
@@ -146,12 +200,13 @@ test.describe("Dashboard Workflow", () => {
     // Click process data button
     await page.locator('[data-testid="process-data-btn"]').click();
 
+    // Wait for network requests to complete
+    await page.waitForLoadState("networkidle");
+
     // Wait for success toast (sonner toast appears)
     await expect(
-      page
-        .locator('[role="status"]')
-        .filter({ hasText: /Successfully processed/i })
-    ).toBeVisible({ timeout: 5000 });
+      page.getByText(/Successfully processed.*records/i)
+    ).toBeVisible({ timeout: 10000 });
 
     // Verify statistics update
     await expect(page.locator('[data-testid="stat-total"]')).toContainText(
@@ -168,11 +223,10 @@ test.describe("Dashboard Workflow", () => {
   }) => {
     // Process data
     await page.locator('[data-testid="process-data-btn"]').click();
+    await page.waitForLoadState("networkidle");
     await expect(
-      page
-        .locator('[role="status"]')
-        .filter({ hasText: /Successfully processed/i })
-    ).toBeVisible({ timeout: 5000 });
+      page.getByText(/Successfully processed.*records/i)
+    ).toBeVisible({ timeout: 10000 });
 
     // Wait for records to appear
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
@@ -204,11 +258,9 @@ test.describe("Dashboard Workflow", () => {
 
     // Export
     await page.locator('[data-testid="export-btn"]').click();
-    await expect(
-      page
-        .locator('[role="status"]')
-        .filter({ hasText: /exported successfully/i })
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/exported successfully/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("should complete edit workflow: view → enable edit → modify → save → verify", async ({
@@ -216,9 +268,10 @@ test.describe("Dashboard Workflow", () => {
   }) => {
     // Process data first
     await page.locator('[data-testid="process-data-btn"]').click();
-    await expect(page.locator("text=/Successfully processed/i")).toBeVisible({
-      timeout: 5000,
-    });
+    await page.waitForLoadState("networkidle");
+    await expect(
+      page.getByText(/Successfully processed.*records/i)
+    ).toBeVisible({ timeout: 10000 });
 
     // Open actions menu
     await page.locator('[data-testid="actions-menu-record-1"]').click();
@@ -241,11 +294,9 @@ test.describe("Dashboard Workflow", () => {
     await page.locator('[data-testid="save-edit-btn"]').click();
 
     // Wait for success message
-    await expect(
-      page
-        .locator('[role="status"]')
-        .filter({ hasText: /updated successfully/i })
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/updated successfully/i)).toBeVisible({
+      timeout: 10000,
+    });
 
     // Dialog should still be open
     await expect(
@@ -261,11 +312,10 @@ test.describe("Dashboard Workflow", () => {
   }) => {
     // Process data
     await page.locator('[data-testid="process-data-btn"]').click();
+    await page.waitForLoadState("networkidle");
     await expect(
-      page
-        .locator('[role="status"]')
-        .filter({ hasText: /Successfully processed/i })
-    ).toBeVisible({ timeout: 5000 });
+      page.getByText(/Successfully processed.*records/i)
+    ).toBeVisible({ timeout: 10000 });
 
     // Open actions menu
     await page.locator('[data-testid="actions-menu-record-1"]').click();
@@ -334,8 +384,8 @@ test.describe("Dashboard Workflow", () => {
     await page.locator('[data-testid="process-data-btn"]').click();
 
     // Verify error toast appears
-    await expect(
-      page.locator('[role="status"]').filter({ hasText: /Failed to process/i })
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Failed to process/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 });

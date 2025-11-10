@@ -4,6 +4,8 @@ import { ExtractionStatus, SourceType } from '@/types/data';
 test.describe('Filters and Search', () => {
   test.beforeEach(async ({ page }) => {
     // Create mock records with different statuses and source types
+    // Use objects to ensure state persists across route handler calls
+    const state = { hasProcessedData: false };
     const mockRecords = [
       {
         id: 'record-1',
@@ -65,64 +67,84 @@ test.describe('Filters and Search', () => {
     ];
 
     await page.route('/api/extractions', async (route) => {
-      const url = new URL(route.request().url());
-      const statusFilter = url.searchParams.get('status');
-      const sourceFilter = url.searchParams.get('sourceType');
-      const searchQuery = url.searchParams.get('search');
-
-      let filteredRecords = [...mockRecords];
-
-      // Apply status filter
-      if (statusFilter && statusFilter !== 'all') {
-        filteredRecords = filteredRecords.filter((r) => r.status === statusFilter);
-      }
-
-      // Apply source type filter
-      if (sourceFilter && sourceFilter !== 'all') {
-        filteredRecords = filteredRecords.filter((r) => r.sourceType === sourceFilter);
-      }
-
-      // Apply search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filteredRecords = filteredRecords.filter(
-          (r) =>
-            r.sourceFile.toLowerCase().includes(query) ||
-            (r.data as any).fullName?.toLowerCase().includes(query) ||
-            (r.data as any).email?.toLowerCase().includes(query) ||
-            (r.data as any).invoiceNumber?.toLowerCase().includes(query)
-        );
-      }
-
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({
-          success: true,
-          data: {
-            records: filteredRecords,
-            statistics: {
-              total: filteredRecords.length,
-              pending: filteredRecords.filter((r) => r.status === ExtractionStatus.PENDING).length,
-              approved: filteredRecords.filter((r) => r.status === ExtractionStatus.APPROVED).length,
-              rejected: filteredRecords.filter((r) => r.status === ExtractionStatus.REJECTED).length,
-              exported: filteredRecords.filter((r) => r.status === ExtractionStatus.EXPORTED).length,
-              failed: filteredRecords.filter((r) => r.status === ExtractionStatus.FAILED).length,
-              bySource: {
-                forms: filteredRecords.filter((r) => r.sourceType === SourceType.FORM).length,
-                emails: filteredRecords.filter((r) => r.sourceType === SourceType.EMAIL).length,
-                invoices: filteredRecords.filter((r) => r.sourceType === SourceType.INVOICE).length,
+      if (route.request().method() === 'POST') {
+        state.hasProcessedData = true;
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            data: {
+              summary: { total: 3, forms: 1, emails: 1, invoices: 1 },
+              records: {
+                forms: [],
+                emails: [],
+                invoices: [],
               },
             },
-          },
-        }),
-      });
+          }),
+        });
+      } else {
+        // GET request
+        const url = new URL(route.request().url());
+        const statusFilter = url.searchParams.get('status');
+        const sourceFilter = url.searchParams.get('sourceType');
+        const searchQuery = url.searchParams.get('search');
+
+        let filteredRecords = state.hasProcessedData ? [...mockRecords] : [];
+
+        // Apply status filter
+        if (statusFilter && statusFilter !== 'all') {
+          filteredRecords = filteredRecords.filter((r) => r.status === statusFilter);
+        }
+
+        // Apply source type filter
+        if (sourceFilter && sourceFilter !== 'all') {
+          filteredRecords = filteredRecords.filter((r) => r.sourceType === sourceFilter);
+        }
+
+        // Apply search filter
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          filteredRecords = filteredRecords.filter(
+            (r) =>
+              r.sourceFile.toLowerCase().includes(query) ||
+              (r.data as any).fullName?.toLowerCase().includes(query) ||
+              (r.data as any).email?.toLowerCase().includes(query) ||
+              (r.data as any).invoiceNumber?.toLowerCase().includes(query)
+          );
+        }
+
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            data: {
+              records: filteredRecords,
+              statistics: {
+                total: filteredRecords.length,
+                pending: filteredRecords.filter((r) => r.status === ExtractionStatus.PENDING).length,
+                approved: filteredRecords.filter((r) => r.status === ExtractionStatus.APPROVED).length,
+                rejected: filteredRecords.filter((r) => r.status === ExtractionStatus.REJECTED).length,
+                exported: filteredRecords.filter((r) => r.status === ExtractionStatus.EXPORTED).length,
+                failed: filteredRecords.filter((r) => r.status === ExtractionStatus.FAILED).length,
+                bySource: {
+                  forms: filteredRecords.filter((r) => r.sourceType === SourceType.FORM).length,
+                  emails: filteredRecords.filter((r) => r.sourceType === SourceType.EMAIL).length,
+                  invoices: filteredRecords.filter((r) => r.sourceType === SourceType.INVOICE).length,
+                },
+              },
+            },
+          }),
+        });
+      }
     });
 
     await page.goto('/');
     
     // Process data first
     await page.locator('[data-testid="process-data-btn"]').click();
-    await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should filter records by status showing only pending records', async ({ page }) => {

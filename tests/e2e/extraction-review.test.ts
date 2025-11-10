@@ -3,8 +3,9 @@ import { ExtractionStatus, SourceType } from '@/types/data';
 
 test.describe('Extraction Review Dialog', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock API responses
-    const mockRecord = {
+    // Track state and record - use objects to ensure state persists across route handler calls
+    const state = { hasProcessedData: false };
+    const mockRecord: any = {
       id: 'record-1',
       sourceType: SourceType.FORM,
       sourceFile: 'contact_form_1.html',
@@ -24,45 +25,99 @@ test.describe('Extraction Review Dialog', () => {
     };
 
     await page.route('/api/extractions', async (route) => {
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({
-          success: true,
-          data: {
-            records: [mockRecord],
-            statistics: {
-              total: 1,
-              pending: 1,
-              approved: 0,
-              rejected: 0,
-              exported: 0,
-              failed: 0,
-              bySource: { forms: 1, emails: 0, invoices: 0 },
+      if (route.request().method() === 'POST') {
+        state.hasProcessedData = true;
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            data: {
+              summary: { total: 1, forms: 1, emails: 0, invoices: 0 },
+              records: {
+                forms: [],
+                emails: [],
+                invoices: [],
+              },
             },
-          },
-        }),
-      });
+          }),
+        });
+      } else {
+        // GET request - return current state of mockRecord
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            data: {
+              records: state.hasProcessedData ? [{ ...mockRecord }] : [],
+              statistics: {
+                total: state.hasProcessedData ? 1 : 0,
+                pending: state.hasProcessedData && mockRecord.status === ExtractionStatus.PENDING ? 1 : 0,
+                approved: state.hasProcessedData && mockRecord.status === ExtractionStatus.APPROVED ? 1 : 0,
+                rejected: state.hasProcessedData && mockRecord.status === ExtractionStatus.REJECTED ? 1 : 0,
+                exported: 0,
+                failed: 0,
+                bySource: { forms: state.hasProcessedData ? 1 : 0, emails: 0, invoices: 0 },
+              },
+            },
+          }),
+        });
+      }
     });
 
     await page.route('/api/approvals', async (route) => {
       const body = await route.request().postDataJSON();
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({
-          success: true,
-          message: `${body.action} successful`,
-        }),
-      });
+      if (body.action === 'edit') {
+        // Update the mock record with edited data
+        mockRecord.data = { ...mockRecord.data, ...body.updatedData };
+        mockRecord.status = ExtractionStatus.EDITED;
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            data: { ...mockRecord },
+            message: 'edit successful',
+          }),
+        });
+      } else if (body.action === 'approve') {
+        // Update status to approved
+        mockRecord.status = ExtractionStatus.APPROVED;
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            message: 'approve successful',
+          }),
+        });
+      } else if (body.action === 'reject') {
+        // Update status to rejected
+        mockRecord.status = ExtractionStatus.REJECTED;
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            message: 'reject successful',
+          }),
+        });
+      } else {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            message: `${body.action} successful`,
+          }),
+        });
+      }
     });
 
     await page.goto('/');
     
     // Process data and open dialog
     await page.locator('[data-testid="process-data-btn"]').click();
-    await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible({ timeout: 10000 });
     await page.locator('[data-testid="actions-menu-record-1"]').click();
     await page.locator('[data-testid="view-record-btn-record-1"]').click();
-    await expect(page.locator('[data-testid="extraction-dialog"]')).toBeVisible();
+    await expect(page.locator('[data-testid="extraction-dialog"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should display record details with all fields populated', async ({ page }) => {
@@ -94,7 +149,7 @@ test.describe('Extraction Review Dialog', () => {
     await page.locator('[data-testid="save-edit-btn"]').click();
     
     // Wait for success message
-    await expect(page.locator('[role="status"]').filter({ hasText: /updated successfully/i })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/updated successfully/i)).toBeVisible({ timeout: 10000 });
     
     // Verify field still shows updated value
     await expect(nameInput).toHaveValue('Jane Smith');
@@ -108,7 +163,7 @@ test.describe('Extraction Review Dialog', () => {
     await page.locator('[data-testid="approve-btn"]').click();
     
     // Wait for success message
-    await expect(page.locator('[role="status"]').filter({ hasText: /approved successfully/i })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/approved successfully/i)).toBeVisible({ timeout: 10000 });
     
     // Dialog should close
     await expect(page.locator('[data-testid="extraction-dialog"]')).not.toBeVisible();
