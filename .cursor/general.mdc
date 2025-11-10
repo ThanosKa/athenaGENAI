@@ -43,6 +43,17 @@ alwaysApply: true
 - Respect Prettier/ESLint preferences.
 - Use server components by default, client components only when needed (interactivity, hooks, browser APIs).
 
+## Cursor Rules Structure
+
+This project uses Cursor's rules system:
+
+- `.cursor/general.mdc` (alwaysApply: true) - Core tech stack, repo context, and behavior rules
+- `.cursor/project-overview.mdc` - Business context and project requirements
+- `.cursor/rules/coding-patterns.md` - TypeScript and Next.js coding patterns
+- `.cursor/rules/design-patterns.md` - UI design system and component patterns
+
+Cursor automatically reads these files to understand the project context.
+
 ## Commit MSG
 
 suggest a commit message wit this format only if requested:
