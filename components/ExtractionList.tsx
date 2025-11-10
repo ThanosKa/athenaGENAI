@@ -11,7 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Eye, Edit, Check, X, FileText, Mail, Receipt, AlertCircle, MoreHorizontal } from 'lucide-react';
 
 export function ExtractionList({
   records,
@@ -37,7 +44,7 @@ export function ExtractionList({
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border border-border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -70,49 +77,55 @@ export function ExtractionList({
               </TableCell>
               <TableCell>
                 {record.warnings.length > 0 && (
-                  <Badge variant="warning">{record.warnings.length}</Badge>
+                  <Badge variant="warning" className="flex items-center gap-1 w-fit">
+                    <AlertCircle className="h-3 w-3" />
+                    {record.warnings.length}
+                  </Badge>
                 )}
                 {record.error && (
-                  <Badge variant="destructive">Error</Badge>
+                  <Badge variant="destructive" className="flex items-center gap-1 w-fit">
+                    <AlertCircle className="h-3 w-3" />
+                    Error
+                  </Badge>
                 )}
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onView(record.id)}
-                  >
-                    View
-                  </Button>
-                  {(record.status === ExtractionStatus.PENDING ||
-                    record.status === ExtractionStatus.EDITED) && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(record.id)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => onApprove(record.id)}
-                        className="bg-green-500 hover:bg-green-600"
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => onReject(record.id)}
-                      >
-                        Reject
-                      </Button>
-                    </>
-                  )}
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onView(record.id)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </DropdownMenuItem>
+                    {(record.status === ExtractionStatus.PENDING ||
+                      record.status === ExtractionStatus.EDITED) && (
+                      <>
+                        <DropdownMenuItem onClick={() => onEdit(record.id)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onApprove(record.id)}
+                          className="text-[#22C55E]"
+                        >
+                          <Check className="h-4 w-4 mr-2" />
+                          Approve
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onReject(record.id)}
+                          className="text-destructive"
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Reject
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
@@ -124,13 +137,19 @@ export function ExtractionList({
 
 function SourceTypeBadge({ type }: { type: SourceType }) {
   const variants = {
-    [SourceType.FORM]: { label: 'Form', variant: 'info' as const },
-    [SourceType.EMAIL]: { label: 'Email', variant: 'secondary' as const },
-    [SourceType.INVOICE]: { label: 'Invoice', variant: 'default' as const },
+    [SourceType.FORM]: { label: 'Form', variant: 'info' as const, icon: FileText },
+    [SourceType.EMAIL]: { label: 'Email', variant: 'secondary' as const, icon: Mail },
+    [SourceType.INVOICE]: { label: 'Invoice', variant: 'default' as const, icon: Receipt },
   };
 
   const config = variants[type];
-  return <Badge variant={config.variant}>{config.label}</Badge>;
+  const Icon = config.icon;
+  return (
+    <Badge variant={config.variant} className="flex items-center gap-1">
+      <Icon className="h-3 w-3" />
+      {config.label}
+    </Badge>
+  );
 }
 
 function StatusBadge({ status }: { status: ExtractionStatus }) {

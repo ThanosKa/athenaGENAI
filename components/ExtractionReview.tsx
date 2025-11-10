@@ -8,13 +8,21 @@ import {
   ExtractedEmailData,
   ExtractedInvoiceData,
 } from '@/types/data';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Check, X } from 'lucide-react';
 
 export function ExtractionReview({
   record,
@@ -38,98 +46,101 @@ export function ExtractionReview({
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Extraction Review</CardTitle>
-            <CardDescription>{record.sourceFile}</CardDescription>
-          </div>
-          <Button variant="ghost" onClick={onClose}>
-            Close
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Warnings */}
-        {record.warnings.length > 0 && (
-          <Alert variant="warning">
-            <AlertTitle>Warnings</AlertTitle>
-            <AlertDescription>
-              <ul className="list-disc list-inside space-y-1">
-                {record.warnings.map((warning, idx) => (
-                  <li key={idx}>{warning}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Extraction Review</DialogTitle>
+          <DialogDescription>
+            {record.sourceFile}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          {/* Warnings */}
+          {record.warnings.length > 0 && (
+            <Alert className="border-amber-200 bg-amber-50">
+              <AlertTitle className="text-amber-800">Warnings</AlertTitle>
+              <AlertDescription className="text-amber-700">
+                <ul className="list-disc list-inside space-y-1">
+                  {record.warnings.map((warning, idx) => (
+                    <li key={idx}>{warning}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
 
-        {/* Error */}
-        {record.error && (
-          <Alert variant="destructive">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{record.error}</AlertDescription>
-          </Alert>
-        )}
+          {/* Error */}
+          {record.error && (
+            <Alert variant="destructive">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{record.error}</AlertDescription>
+            </Alert>
+          )}
 
-        {/* Data fields based on source type */}
-        {record.sourceType === SourceType.FORM && (
-          <FormDataFields
-            data={editedData as ExtractedFormData}
-            isEditing={isEditing}
-            onChange={setEditedData}
-          />
-        )}
+          {/* Data fields based on source type */}
+          {record.sourceType === SourceType.FORM && (
+            <FormDataFields
+              data={editedData as ExtractedFormData}
+              isEditing={isEditing}
+              onChange={setEditedData}
+            />
+          )}
 
-        {record.sourceType === SourceType.EMAIL && (
-          <EmailDataFields
-            data={editedData as ExtractedEmailData}
-            isEditing={isEditing}
-            onChange={setEditedData}
-          />
-        )}
+          {record.sourceType === SourceType.EMAIL && (
+            <EmailDataFields
+              data={editedData as ExtractedEmailData}
+              isEditing={isEditing}
+              onChange={setEditedData}
+            />
+          )}
 
-        {record.sourceType === SourceType.INVOICE && (
-          <InvoiceDataFields
-            data={editedData as ExtractedInvoiceData}
-            isEditing={isEditing}
-            onChange={setEditedData}
-          />
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <div className="flex gap-2">
-          {isEditing ? (
-            <>
-              <Button onClick={handleSave}>Save Changes</Button>
-              <Button variant="outline" onClick={() => {
-                setEditedData(record.data);
-                setIsEditing(false);
-              }}>
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <Button variant="outline" onClick={() => setIsEditing(true)}>
-              Edit
-            </Button>
+          {record.sourceType === SourceType.INVOICE && (
+            <InvoiceDataFields
+              data={editedData as ExtractedInvoiceData}
+              isEditing={isEditing}
+              onChange={setEditedData}
+            />
           )}
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="default"
-            onClick={onApprove}
-            className="bg-green-500 hover:bg-green-600"
-          >
-            Approve
-          </Button>
-          <Button variant="destructive" onClick={onReject}>
-            Reject
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+
+        <DialogFooter className="flex justify-between sm:justify-between">
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <Button onClick={handleSave}>
+                  Save Changes
+                </Button>
+                <Button variant="outline" onClick={() => {
+                  setEditedData(record.data);
+                  setIsEditing(false);
+                }}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" onClick={() => setIsEditing(true)}>
+                Edit
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="default"
+              onClick={onApprove}
+              className="bg-green-500 hover:bg-green-600 text-white"
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Approve
+            </Button>
+            <Button variant="destructive" onClick={onReject}>
+              <X className="h-4 w-4 mr-2" />
+              Reject
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
