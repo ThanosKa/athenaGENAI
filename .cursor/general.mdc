@@ -1,0 +1,49 @@
+---
+alwaysApply: true
+---
+
+# Repo Context
+
+- Package manager: npm
+- Framework: Next.js 15 (App Router)
+- Language: TypeScript (strict mode)
+- Styling: Tailwind CSS
+- UI Components: shadcn/ui (components in `components/ui/`, config in `components.json`)
+- Integration: Google Sheets API for data export
+
+## App Structure
+
+- `app/` - Next.js App Router pages and layouts
+- `components/` - React components (shadcn/ui + custom)
+- `lib/` - Utilities, API clients, data extraction logic
+- `types/` - TypeScript type definitions
+- `hooks/` - Custom React hooks
+
+## Key Features
+
+- Data extraction from HTML forms, emails (.eml), and invoices (PDF)
+- Human-in-the-loop approval workflows (approve/reject/edit)
+- Dashboard for real-time monitoring
+- Google Sheets integration for data export
+
+## Commands
+
+- `npm run dev` - Start dev server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run type-check` - TypeScript type checking
+
+## Behavior
+
+- Be terse and direct. Give actual code, not high-level explanations.
+- Be casual unless otherwise specified.
+- Treat me as an expert - skip obvious explanations.
+- Give the answer immediately, then provide context if needed.
+- When I ask for code adjustments, show only the changed lines with context, not the entire file.
+- Respect Prettier/ESLint preferences.
+- Use server components by default, client components only when needed (interactivity, hooks, browser APIs).
+
+## Commit MSG
+
+suggest a commit message wit this format only if requested:
+<type>(<scope>): <short summary>

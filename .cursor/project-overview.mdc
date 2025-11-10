@@ -1,0 +1,47 @@
+---
+alwaysApply: true
+---
+
+# Project Overview
+
+## Business Context
+
+This is a data automation project for **TechFlow Solutions** (50-100 employees, IT services company). They need to automate manual data entry from multiple sources.
+
+## Problem Statement
+
+- Daily form submissions from website with customer data
+- Emails containing customer information and invoices (PDF)
+- Manual data entry into spreadsheets
+- Need for centralized data management with filtering/search
+
+## Solution Requirements
+
+### Data Extraction
+
+- Extract data from HTML forms (name, email, phone, company, service interest)
+- Extract customer data from emails (.eml format)
+- Extract invoice data from PDFs (invoice number, date, customer, amount, VAT)
+
+### Human-in-the-Loop Workflow
+
+- **Dashboard**: Real-time monitoring of all extractions
+- **Approval System**: User must approve/reject each extraction before saving
+- **Manual Edit**: Edit extracted data before approval
+- **Error Detection**: Show warnings and errors clearly
+- **Full Control**: User has complete control over the process
+
+### Integration
+
+- Export approved data to Google Sheets or Excel
+- Automatic updates
+- Filtering and search capabilities
+- Alerts for new data
+
+## Key Features
+
+1. Multi-source data extraction (forms, emails, invoices)
+2. Approval workflow with manual override
+3. Real-time dashboard
+4. Google Sheets/Excel integration
+5. Error handling and validation
