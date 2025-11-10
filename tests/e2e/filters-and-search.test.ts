@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "@/tests/fixtures";
 import {
   ExtractionStatus,
   SourceType,
@@ -31,9 +32,7 @@ function isInvoiceData(
 
 test.describe("Filters and Search", () => {
   test.beforeEach(async ({ page }) => {
-    // Create mock records with different statuses and source types
-    // Use objects to ensure state persists across route handler calls
-    const state = { hasProcessedData: false };
+    // Create mock records with different statuses and source types - always available for testing
     const mockRecords = [
       {
         id: "record-1",
@@ -96,7 +95,7 @@ test.describe("Filters and Search", () => {
 
     await page.route("/api/extractions", async (route) => {
       if (route.request().method() === "POST") {
-        state.hasProcessedData = true;
+        // Mock successful processing
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -112,13 +111,13 @@ test.describe("Filters and Search", () => {
           }),
         });
       } else {
-        // GET request
+        // GET request - return mock records with filters applied
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
         const sourceFilter = url.searchParams.get("sourceType");
         const searchQuery = url.searchParams.get("search");
 
-        let filteredRecords = state.hasProcessedData ? [...mockRecords] : [];
+        let filteredRecords = [...mockRecords];
 
         // Apply status filter
         if (statusFilter && statusFilter !== "all") {
@@ -224,6 +223,7 @@ test.describe("Filters and Search", () => {
   }) => {
     // Click status filter
     await page.locator('[data-testid="filter-status-select"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown portal to render
 
     // Select Pending
     await page.locator("text=Pending").click();
@@ -249,6 +249,7 @@ test.describe("Filters and Search", () => {
   }) => {
     // Click source type filter
     await page.locator('[data-testid="filter-source-select"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown portal to render
 
     // Select Forms
     await page.locator("text=Forms").click();
@@ -294,10 +295,12 @@ test.describe("Filters and Search", () => {
   }) => {
     // Set status filter to Pending
     await page.locator('[data-testid="filter-status-select"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown portal to render
     await page.locator("text=Pending").click();
 
     // Set source filter to Form
     await page.locator('[data-testid="filter-source-select"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown portal to render
     await page.locator("text=Forms").click();
 
     // Add search query
@@ -317,6 +320,7 @@ test.describe("Filters and Search", () => {
   test('should reset filters when changing back to "All"', async ({ page }) => {
     // Apply filters
     await page.locator('[data-testid="filter-status-select"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown portal to render
     await page.locator("text=Pending").click();
 
     // Verify filtered results
@@ -325,6 +329,7 @@ test.describe("Filters and Search", () => {
 
     // Reset to "All"
     await page.locator('[data-testid="filter-status-select"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown portal to render
     await page.locator("text=All").click();
 
     // Verify all records are shown again

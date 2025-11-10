@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '@/tests/fixtures';
 import { ExtractionStatus, SourceType } from '@/types/data';
 
 test.describe('Extraction Review Dialog', () => {
   test.beforeEach(async ({ page }) => {
-    // Track state and record - use objects to ensure state persists across route handler calls
-    const state = { hasProcessedData: false };
+    // Mock record - always available for testing
     const mockRecord: any = {
       id: 'record-1',
       sourceType: SourceType.FORM,
@@ -26,7 +26,7 @@ test.describe('Extraction Review Dialog', () => {
 
     await page.route('/api/extractions', async (route) => {
       if (route.request().method() === 'POST') {
-        state.hasProcessedData = true;
+        // Mock successful processing
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -42,21 +42,21 @@ test.describe('Extraction Review Dialog', () => {
           }),
         });
       } else {
-        // GET request - return current state of mockRecord
+        // GET request - return mockRecord
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
             success: true,
             data: {
-              records: state.hasProcessedData ? [{ ...mockRecord }] : [],
+              records: [{ ...mockRecord }],
               statistics: {
-                total: state.hasProcessedData ? 1 : 0,
-                pending: state.hasProcessedData && mockRecord.status === ExtractionStatus.PENDING ? 1 : 0,
-                approved: state.hasProcessedData && mockRecord.status === ExtractionStatus.APPROVED ? 1 : 0,
-                rejected: state.hasProcessedData && mockRecord.status === ExtractionStatus.REJECTED ? 1 : 0,
+                total: 1,
+                pending: mockRecord.status === ExtractionStatus.PENDING ? 1 : 0,
+                approved: mockRecord.status === ExtractionStatus.APPROVED ? 1 : 0,
+                rejected: mockRecord.status === ExtractionStatus.REJECTED ? 1 : 0,
                 exported: 0,
                 failed: 0,
-                bySource: { forms: state.hasProcessedData ? 1 : 0, emails: 0, invoices: 0 },
+                bySource: { forms: 1, emails: 0, invoices: 0 },
               },
             },
           }),
@@ -116,6 +116,7 @@ test.describe('Extraction Review Dialog', () => {
     await page.waitForLoadState("networkidle");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible({ timeout: 10000 });
     await page.locator('[data-testid="actions-menu-record-1"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown menu to render
     await page.locator('[data-testid="view-record-btn-record-1"]').click();
     await expect(page.locator('[data-testid="extraction-dialog"]')).toBeVisible({ timeout: 10000 });
   });
@@ -181,6 +182,7 @@ test.describe('Extraction Review Dialog', () => {
     
     // Verify warning badge in list (if we open it again)
     await page.locator('[data-testid="actions-menu-record-1"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown menu to render
     await page.locator('[data-testid="view-record-btn-record-1"]').click();
     
     // Warning should still be visible

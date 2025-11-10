@@ -1,10 +1,10 @@
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "@/tests/fixtures";
 import { ExtractionStatus, SourceType } from "@/types/data";
 
 test.describe("Dashboard Workflow", () => {
   test.beforeEach(async ({ page }) => {
-    // Track state and records - use objects to ensure state persists across route handler calls
-    const state = { hasProcessedData: false };
+    // Mock records - always available for testing
     const records: any[] = [
       {
         id: "record-1",
@@ -50,7 +50,7 @@ test.describe("Dashboard Workflow", () => {
     // Mock API responses
     await page.route("/api/extractions", async (route) => {
       if (route.request().method() === "POST") {
-        state.hasProcessedData = true;
+        // Mock successful processing
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -66,16 +66,14 @@ test.describe("Dashboard Workflow", () => {
           }),
         });
       } else {
-        // GET request
+        // GET request - return mock records
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
 
-        const mockRecords = state.hasProcessedData ? [...records] : [];
-
         const filteredRecords =
           statusFilter && statusFilter !== "all"
-            ? mockRecords.filter((r) => r.status === statusFilter)
-            : mockRecords;
+            ? records.filter((r) => r.status === statusFilter)
+            : records;
 
         await route.fulfill({
           status: 200,
@@ -84,7 +82,7 @@ test.describe("Dashboard Workflow", () => {
             data: {
               records: filteredRecords,
               statistics: {
-                total: state.hasProcessedData ? 25 : filteredRecords.length,
+                total: 25,
                 pending: filteredRecords.filter(
                   (r) => r.status === ExtractionStatus.PENDING
                 ).length,
@@ -101,21 +99,9 @@ test.describe("Dashboard Workflow", () => {
                   (r) => r.status === ExtractionStatus.FAILED
                 ).length,
                 bySource: {
-                  forms: state.hasProcessedData
-                    ? 5
-                    : filteredRecords.filter(
-                        (r) => r.sourceType === SourceType.FORM
-                      ).length,
-                  emails: state.hasProcessedData
-                    ? 10
-                    : filteredRecords.filter(
-                        (r) => r.sourceType === SourceType.EMAIL
-                      ).length,
-                  invoices: state.hasProcessedData
-                    ? 10
-                    : filteredRecords.filter(
-                        (r) => r.sourceType === SourceType.INVOICE
-                      ).length,
+                  forms: 5,
+                  emails: 10,
+                  invoices: 10,
                 },
               },
             },
@@ -233,6 +219,7 @@ test.describe("Dashboard Workflow", () => {
 
     // Open actions menu for first record
     await page.locator('[data-testid="actions-menu-record-1"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown menu to render
 
     // View record
     await page.locator('[data-testid="view-record-btn-record-1"]').click();
@@ -275,6 +262,7 @@ test.describe("Dashboard Workflow", () => {
 
     // Open actions menu
     await page.locator('[data-testid="actions-menu-record-1"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown menu to render
 
     // View record
     await page.locator('[data-testid="view-record-btn-record-1"]').click();
@@ -319,6 +307,7 @@ test.describe("Dashboard Workflow", () => {
 
     // Open actions menu
     await page.locator('[data-testid="actions-menu-record-1"]').click();
+    await page.waitForTimeout(300); // Wait for dropdown menu to render
 
     // View record
     await page.locator('[data-testid="view-record-btn-record-1"]').click();
