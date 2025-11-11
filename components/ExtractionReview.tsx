@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import {
   ExtractionRecord,
   SourceType,
@@ -58,7 +58,7 @@ export function ExtractionReview({
   };
 
   return (
-    <div key={record.id}>
+    <Fragment key={record.id}>
       <Dialog open={true} onOpenChange={handleOpenChange}>
         <DialogContent
           className="max-w-2xl max-h-[90vh] overflow-y-auto"
@@ -164,7 +164,7 @@ export function ExtractionReview({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </Fragment>
   );
 }
 

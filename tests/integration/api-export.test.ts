@@ -212,7 +212,7 @@ test.describe("API Export", () => {
       status: ExtractionStatus.PENDING,
     });
 
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "GET") {
         await route.fulfill({
           status: 200,
@@ -274,6 +274,63 @@ test.describe("API Export", () => {
     // Arrange
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let exportRequestData: any = null;
+
+    const approvedRecord1 = createMockFormRecord({
+      id: "record-approved-1",
+      status: ExtractionStatus.APPROVED,
+    });
+    const approvedRecord2 = createMockFormRecord({
+      id: "record-approved-2",
+      status: ExtractionStatus.APPROVED,
+    });
+    const pendingRecord = createMockFormRecord({
+      id: "record-pending",
+      status: ExtractionStatus.PENDING,
+    });
+
+    await page.route("/api/extractions**", async (route) => {
+      if (route.request().method() === "GET") {
+        const url = new URL(route.request().url());
+        const statusFilter = url.searchParams.get("status");
+
+        let records = [approvedRecord1, approvedRecord2, pendingRecord];
+        if (statusFilter && statusFilter !== "all") {
+          records = records.filter((r) => r.status === statusFilter);
+        }
+
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            data: {
+              records,
+              statistics: {
+                total: records.length,
+                pending: records.filter(
+                  (r) => r.status === ExtractionStatus.PENDING
+                ).length,
+                approved: records.filter(
+                  (r) => r.status === ExtractionStatus.APPROVED
+                ).length,
+                rejected: records.filter(
+                  (r) => r.status === ExtractionStatus.REJECTED
+                ).length,
+                exported: records.filter(
+                  (r) => r.status === ExtractionStatus.EXPORTED
+                ).length,
+                failed: 0,
+                bySource: {
+                  forms: records.filter((r) => r.sourceType === SourceType.FORM)
+                    .length,
+                  emails: 0,
+                  invoices: 0,
+                },
+              },
+            },
+          }),
+        });
+      }
+    });
 
     await page.route("/api/export", async (route) => {
       if (route.request().method() === "POST") {
