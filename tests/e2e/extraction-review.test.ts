@@ -123,6 +123,8 @@ test.describe("Extraction Review Dialog", () => {
   test("should display record details with all fields populated", async ({
     page,
   }) => {
+    // Arrange (setup in beforeEach - dialog already open)
+    // Assert
     await expect(
       page.locator('[data-testid="extraction-dialog"]')
     ).toBeVisible();
@@ -145,6 +147,8 @@ test.describe("Extraction Review Dialog", () => {
   test("should enable edit mode, modify fields, save and verify updates", async ({
     page,
   }) => {
+    // Arrange (setup in beforeEach - dialog already open)
+    // Act
     await page.locator('[data-testid="enable-edit-btn"]').click();
 
     const nameInput = page.locator('[data-testid="field-fullName"]');
@@ -155,6 +159,7 @@ test.describe("Extraction Review Dialog", () => {
 
     await page.locator('[data-testid="save-edit-btn"]').click();
 
+    // Assert
     await expect(page.getByText(/updated successfully/i)).toBeVisible({
       timeout: 10000,
     });
@@ -165,8 +170,11 @@ test.describe("Extraction Review Dialog", () => {
   });
 
   test("should approve from dialog and update status", async ({ page }) => {
+    // Arrange (setup in beforeEach - dialog already open)
+    // Act
     await page.locator('[data-testid="approve-btn"]').click();
 
+    // Assert
     await expect(page.getByText(/approved successfully/i)).toBeVisible({
       timeout: 10000,
     });
@@ -183,6 +191,8 @@ test.describe("Extraction Review Dialog", () => {
   test("should display warning badges for incomplete data", async ({
     page,
   }) => {
+    // Arrange (setup in beforeEach - dialog already open)
+    // Assert
     await expect(page.locator('[data-testid="warnings-alert"]')).toBeVisible();
 
     await expect(

@@ -12,6 +12,7 @@ describe("extractInvoiceData", () => {
   });
 
   it("should extract invoice number TF-2024-XXX pattern", () => {
+    // Arrange
     const htmlContent = `
       <div class="invoice-details">
         <strong>Αριθμός:</strong> TF-2024-001<br>
@@ -25,16 +26,19 @@ describe("extractInvoiceData", () => {
       </div>
     `;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invoice_TF-2024-001.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.invoiceNumber).toBe("TF-2024-001");
   });
 
   it("should extract financial data (amounts, VAT)", () => {
+    // Arrange
     const htmlContent = `
       <div class="invoice-details">
         <strong>Αριθμός:</strong> TF-2024-002<br>
@@ -48,11 +52,13 @@ describe("extractInvoiceData", () => {
       </div>
     `;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invoice_TF-2024-002.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.netAmount).toBe(2500);
     expect(result.data?.vatRate).toBe(24);
@@ -61,6 +67,7 @@ describe("extractInvoiceData", () => {
   });
 
   it("should extract invoice date", () => {
+    // Arrange
     const htmlContent = `
       <div class="invoice-details">
         <strong>Αριθμός:</strong> TF-2024-003<br>
@@ -74,16 +81,19 @@ describe("extractInvoiceData", () => {
       </div>
     `;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invoice_TF-2024-003.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.date).toBe("25/01/2024");
   });
 
   it("should validate VAT calculation", () => {
+    // Arrange
     const htmlContent = `
       <div class="invoice-details">
         <strong>Αριθμός:</strong> TF-2024-004<br>
@@ -97,11 +107,13 @@ describe("extractInvoiceData", () => {
       </div>
     `;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invoice_TF-2024-004.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.warnings?.some((w) => w.includes("VAT calculation"))).toBe(
       true
@@ -109,6 +121,7 @@ describe("extractInvoiceData", () => {
   });
 
   it("should extract customer information", () => {
+    // Arrange
     const htmlContent = `
       <div class="invoice-details">
         <strong>Αριθμός:</strong> TF-2024-005<br>
@@ -128,11 +141,13 @@ describe("extractInvoiceData", () => {
       </div>
     `;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invoice_TF-2024-005.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     if (result.data?.customerName) {
       expect(result.data.customerName).toBe("Customer Name");
@@ -143,6 +158,7 @@ describe("extractInvoiceData", () => {
   });
 
   it("should extract line items from invoice table", () => {
+    // Arrange
     const htmlContent = `
       <div class="invoice-details">
         <strong>Αριθμός:</strong> TF-2024-006<br>
@@ -172,11 +188,13 @@ describe("extractInvoiceData", () => {
       </div>
     `;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invoice_TF-2024-006.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.items.length).toBe(2);
     expect(result.data?.items[0].description).toBe("Service 1");
@@ -186,6 +204,7 @@ describe("extractInvoiceData", () => {
   });
 
   it("should handle missing financial data with warnings", () => {
+    // Arrange
     const htmlContent = `
       <div class="invoice-details">
         <strong>Αριθμός:</strong> TF-2024-007<br>
@@ -193,29 +212,35 @@ describe("extractInvoiceData", () => {
       </div>
     `;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invoice_TF-2024-007.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.warnings?.some((w) => w.includes("date"))).toBe(true);
     expect(result.warnings?.some((w) => w.includes("items"))).toBe(true);
   });
 
   it("should handle invalid invoice structure", () => {
+    // Arrange
     const htmlContent = "<div>Not an invoice</div>";
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invalid_invoice.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.warnings?.length).toBeGreaterThan(0);
   });
 
   it("should parse currency with different formats", () => {
+    // Arrange
     const htmlContent = `
       <div class="invoice-details">
         <strong>Αριθμός:</strong> TF-2024-008<br>
@@ -229,11 +254,13 @@ describe("extractInvoiceData", () => {
       </div>
     `;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invoice_TF-2024-008.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.netAmount).toBe(1054.5);
     expect(result.data?.vatAmount).toBe(253.08);
@@ -241,6 +268,7 @@ describe("extractInvoiceData", () => {
   });
 
   it("should extract payment method", () => {
+    // Arrange
     const htmlContent = `
       <div class="invoice-details">
         <strong>Αριθμός:</strong> TF-2024-009<br>
@@ -255,23 +283,28 @@ describe("extractInvoiceData", () => {
       </div>
     `;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "invoice_TF-2024-009.html",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.paymentMethod).toContain("Μετρητά");
   });
 
   it("should handle parsing errors gracefully", () => {
+    // Arrange
     const htmlContent = null as unknown as string;
 
+    // Act
     const result = extractInvoiceData({
       htmlContent,
       sourceFile: "error_invoice.html",
     });
 
+    // Assert
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
     expect(result.error).toContain("Failed to parse invoice");

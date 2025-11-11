@@ -52,6 +52,7 @@ describe("DataProcessor", () => {
   });
 
   it("should process form file successfully", async () => {
+    // Arrange
     const mockFormData = {
       success: true,
       data: {
@@ -70,11 +71,13 @@ describe("DataProcessor", () => {
     vi.mocked(extractFormData).mockReturnValue(mockFormData);
     vi.mocked(fs.readFile).mockResolvedValue("<html>form content</html>");
 
+    // Act
     const record = await dataProcessor.processForm({
       filePath: "/path/to/form.html",
       fileName: "form_1.html",
     });
 
+    // Assert
     expect(record.sourceType).toBe(SourceType.FORM);
     expect(record.sourceFile).toBe("form_1.html");
     expect(record.status).toBe(ExtractionStatus.PENDING);
@@ -83,6 +86,7 @@ describe("DataProcessor", () => {
   });
 
   it("should process email file successfully", async () => {
+    // Arrange
     const mockEmailData = {
       success: true,
       data: {
@@ -102,17 +106,20 @@ describe("DataProcessor", () => {
     vi.mocked(extractEmailData).mockResolvedValue(mockEmailData);
     vi.mocked(fs.readFile).mockResolvedValue("From: sender@example.com");
 
+    // Act
     const record = await dataProcessor.processEmail({
       filePath: "/path/to/email.eml",
       fileName: "email_1.eml",
     });
 
+    // Assert
     expect(record.sourceType).toBe(SourceType.EMAIL);
     expect(record.sourceFile).toBe("email_1.eml");
     expect(record.status).toBe(ExtractionStatus.PENDING);
   });
 
   it("should process invoice file successfully", async () => {
+    // Arrange
     const mockInvoiceData = {
       success: true,
       data: {
@@ -131,17 +138,20 @@ describe("DataProcessor", () => {
     vi.mocked(extractInvoiceData).mockReturnValue(mockInvoiceData);
     vi.mocked(fs.readFile).mockResolvedValue("<html>invoice content</html>");
 
+    // Act
     const record = await dataProcessor.processInvoice({
       filePath: "/path/to/invoice.html",
       fileName: "invoice_1.html",
     });
 
+    // Assert
     expect(record.sourceType).toBe(SourceType.INVOICE);
     expect(record.sourceFile).toBe("invoice_1.html");
     expect(record.status).toBe(ExtractionStatus.PENDING);
   });
 
   it("should mark record as failed when extraction fails", async () => {
+    // Arrange
     const mockFormData = {
       success: false,
       error: "Failed to parse form",
@@ -150,16 +160,19 @@ describe("DataProcessor", () => {
     vi.mocked(extractFormData).mockReturnValue(mockFormData);
     vi.mocked(fs.readFile).mockResolvedValue("<html>invalid</html>");
 
+    // Act
     const record = await dataProcessor.processForm({
       filePath: "/path/to/form.html",
       fileName: "form_error.html",
     });
 
+    // Assert
     expect(record.status).toBe(ExtractionStatus.FAILED);
     expect(record.error).toBe("Failed to parse form");
   });
 
   it("should process all dummy data files", async () => {
+    // Arrange
     (fs.readdir as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       createReaddirMock
     );
@@ -210,8 +223,10 @@ describe("DataProcessor", () => {
       warnings: [],
     });
 
+    // Act
     const result = await dataProcessor.processAllDummyData();
 
+    // Assert
     expect(result.forms.length).toBe(2);
     expect(result.emails.length).toBe(2);
     expect(result.invoices.length).toBe(2);
@@ -219,6 +234,7 @@ describe("DataProcessor", () => {
   });
 
   it("should handle mixed success/failure scenarios", async () => {
+    // Arrange
     (fs.readdir as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       (dir: PathLike): Promise<string[]> => {
         const dirStr = String(dir);
@@ -251,8 +267,10 @@ describe("DataProcessor", () => {
 
     vi.mocked(fs.readFile).mockResolvedValue("content");
 
+    // Act
     const result = await dataProcessor.processAllDummyData();
 
+    // Assert
     expect(result.forms.length).toBe(2);
     expect(result.emails.length).toBe(0);
     expect(result.invoices.length).toBe(0);

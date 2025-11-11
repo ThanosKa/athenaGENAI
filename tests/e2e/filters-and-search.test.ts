@@ -209,10 +209,13 @@ test.describe("Filters and Search", () => {
   test("should filter records by status showing only pending records", async ({
     page,
   }) => {
+    // Arrange (setup in beforeEach)
+    // Act
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'Pending' }).click();
 
+    // Assert
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
     const rows = page.locator('[data-testid^="record-row-"]');
@@ -229,10 +232,13 @@ test.describe("Filters and Search", () => {
   test("should filter records by source type showing only forms", async ({
     page,
   }) => {
+    // Arrange (setup in beforeEach)
+    // Act
     await page.locator('[data-testid="filter-source-select"]').click();
     await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'Forms' }).click();
 
+    // Assert
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
     const rows = page.locator('[data-testid^="record-row-"]');
@@ -246,8 +252,11 @@ test.describe("Filters and Search", () => {
   test("should search records by query and filter results", async ({
     page,
   }) => {
+    // Arrange (setup in beforeEach)
+    // Act
     await page.locator('[data-testid="search-input"]').fill("John");
 
+    // Assert
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
     const rows = page.locator('[data-testid^="record-row-"]');
@@ -264,6 +273,8 @@ test.describe("Filters and Search", () => {
   test("should combine filters and search to narrow results", async ({
     page,
   }) => {
+    // Arrange (setup in beforeEach)
+    // Act
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'Pending' }).click();
@@ -274,6 +285,7 @@ test.describe("Filters and Search", () => {
 
     await page.locator('[data-testid="search-input"]').fill("John");
 
+    // Assert
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
     const rows = page.locator('[data-testid^="record-row-"]');
@@ -284,6 +296,7 @@ test.describe("Filters and Search", () => {
   });
 
   test('should reset filters when changing back to "All"', async ({ page }) => {
+    // Arrange (setup in beforeEach)
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'Pending' }).click();
@@ -291,10 +304,12 @@ test.describe("Filters and Search", () => {
     let rows = page.locator('[data-testid^="record-row-"]');
     await expect(rows).toHaveCount(2);
 
+    // Act
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'All' }).click();
 
+    // Assert
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
     await expect(rows).toHaveCount(3);

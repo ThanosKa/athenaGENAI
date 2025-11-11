@@ -14,6 +14,7 @@ describe("ApprovalService", () => {
   });
 
   it("should approve pending extraction", () => {
+    // Arrange
     const record: ExtractionRecord = {
       id: "approve-1",
       sourceType: SourceType.FORM,
@@ -25,11 +26,13 @@ describe("ApprovalService", () => {
     };
 
     storageService.addRecord(record);
+    // Act
     const success = approvalService.approve({
       id: "approve-1",
       approvedBy: "admin",
     });
 
+    // Assert
     expect(success).toBe(true);
     const updated = storageService.getRecord("approve-1");
     expect(updated?.status).toBe(ExtractionStatus.APPROVED);
@@ -38,6 +41,7 @@ describe("ApprovalService", () => {
   });
 
   it("should reject pending extraction", () => {
+    // Arrange
     const record: ExtractionRecord = {
       id: "reject-1",
       sourceType: SourceType.FORM,
@@ -49,12 +53,14 @@ describe("ApprovalService", () => {
     };
 
     storageService.addRecord(record);
+    // Act
     const success = approvalService.reject({
       id: "reject-1",
       rejectedBy: "admin",
       reason: "Invalid data",
     });
 
+    // Assert
     expect(success).toBe(true);
     const updated = storageService.getRecord("reject-1");
     expect(updated?.status).toBe(ExtractionStatus.REJECTED);
@@ -121,6 +127,7 @@ describe("ApprovalService", () => {
   });
 
   it("should bulk approve multiple records", () => {
+    // Arrange
     const records: ExtractionRecord[] = [
       {
         id: "bulk-1",
@@ -153,11 +160,13 @@ describe("ApprovalService", () => {
 
     records.forEach((r) => storageService.addRecord(r));
 
+    // Act
     const result = approvalService.bulkApprove({
       ids: ["bulk-1", "bulk-2", "bulk-3"],
       approvedBy: "admin",
     });
 
+    // Assert
     expect(result.succeeded.length).toBe(2);
     expect(result.failed.length).toBe(1);
     expect(result.succeeded).toContain("bulk-1");
@@ -166,6 +175,7 @@ describe("ApprovalService", () => {
   });
 
   it("should bulk reject multiple records", () => {
+    // Arrange
     const records: ExtractionRecord[] = [
       {
         id: "bulk-reject-1",
@@ -189,17 +199,20 @@ describe("ApprovalService", () => {
 
     records.forEach((r) => storageService.addRecord(r));
 
+    // Act
     const result = approvalService.bulkReject({
       ids: ["bulk-reject-1", "bulk-reject-2"],
       rejectedBy: "admin",
       reason: "Bulk rejection",
     });
 
+    // Assert
     expect(result.succeeded.length).toBe(2);
     expect(result.failed.length).toBe(0);
   });
 
   it("should mark approved record as exported", () => {
+    // Arrange
     const record: ExtractionRecord = {
       id: "export-1",
       sourceType: SourceType.FORM,
@@ -211,8 +224,10 @@ describe("ApprovalService", () => {
     };
 
     storageService.addRecord(record);
+    // Act
     const success = approvalService.markAsExported({ id: "export-1" });
 
+    // Assert
     expect(success).toBe(true);
     const updated = storageService.getRecord("export-1");
     expect(updated?.status).toBe(ExtractionStatus.EXPORTED);

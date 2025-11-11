@@ -12,6 +12,7 @@ describe('extractFormData', () => {
   });
 
   it('should extract all form fields from valid HTML form', () => {
+    // Arrange
     const htmlContent = `
       <form>
         <input name="full_name" value="Νίκος Παπαδόπουλος" />
@@ -29,11 +30,13 @@ describe('extractFormData', () => {
       </form>
     `;
 
+    // Act
     const result = extractFormData({
       htmlContent,
       sourceFile: 'contact_form_1.html',
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data).toBeDefined();
     expect(result.data?.fullName).toBe('Νίκος Παπαδόπουλος');
@@ -45,6 +48,7 @@ describe('extractFormData', () => {
   });
 
   it('should handle missing required fields with warnings', () => {
+    // Arrange
     const htmlContent = `
       <form>
         <input name="full_name" value="" />
@@ -52,11 +56,13 @@ describe('extractFormData', () => {
       </form>
     `;
 
+    // Act
     const result = extractFormData({
       htmlContent,
       sourceFile: 'incomplete_form.html',
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.warnings).toBeDefined();
     expect(result.warnings?.length).toBeGreaterThan(0);
@@ -65,6 +71,7 @@ describe('extractFormData', () => {
   });
 
   it('should validate email format', () => {
+    // Arrange
     const htmlContent = `
       <form>
         <input name="full_name" value="John Doe" />
@@ -77,28 +84,34 @@ describe('extractFormData', () => {
       </form>
     `;
 
+    // Act
     const result = extractFormData({
       htmlContent,
       sourceFile: 'invalid_email.html',
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.warnings?.some(w => w.includes('Email format'))).toBe(true);
   });
 
   it('should handle malformed HTML gracefully', () => {
+    // Arrange
     const htmlContent = '<div>Not a form</div>';
 
+    // Act
     const result = extractFormData({
       htmlContent,
       sourceFile: 'no_form.html',
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.warnings?.length).toBeGreaterThan(0);
   });
 
   it('should support Greek characters in form values', () => {
+    // Arrange
     const htmlContent = `
       <form>
         <input name="full_name" value="Γιάννης Κωνσταντίνου" />
@@ -111,11 +124,13 @@ describe('extractFormData', () => {
       </form>
     `;
 
+    // Act
     const result = extractFormData({
       htmlContent,
       sourceFile: 'greek_form.html',
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.fullName).toBe('Γιάννης Κωνσταντίνου');
     expect(result.data?.company).toBe('Ελληνική Εταιρεία ΑΕ');
@@ -123,6 +138,7 @@ describe('extractFormData', () => {
   });
 
   it('should handle select elements with selected option', () => {
+    // Arrange
     const htmlContent = `
       <form>
         <input name="full_name" value="Test User" />
@@ -136,16 +152,19 @@ describe('extractFormData', () => {
       </form>
     `;
 
+    // Act
     const result = extractFormData({
       htmlContent,
       sourceFile: 'select_form.html',
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.service).toBe('Option 2');
   });
 
   it('should handle empty form fields', () => {
+    // Arrange
     const htmlContent = `
       <form>
         <input name="full_name" value="" />
@@ -156,11 +175,13 @@ describe('extractFormData', () => {
       </form>
     `;
 
+    // Act
     const result = extractFormData({
       htmlContent,
       sourceFile: 'empty_form.html',
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.warnings?.length).toBeGreaterThan(0);
     expect(result.data?.fullName).toBe('');
@@ -168,6 +189,7 @@ describe('extractFormData', () => {
   });
 
   it('should validate name and company length', () => {
+    // Arrange
     const htmlContent = `
       <form>
         <input name="full_name" value="A" />
@@ -180,23 +202,28 @@ describe('extractFormData', () => {
       </form>
     `;
 
+    // Act
     const result = extractFormData({
       htmlContent,
       sourceFile: 'short_fields.html',
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.warnings?.some(w => w.includes('too short'))).toBe(true);
   });
 
   it('should handle parsing errors', () => {
+    // Arrange
     const htmlContent = null as unknown as string;
 
+    // Act
     const result = extractFormData({
       htmlContent,
       sourceFile: 'error_form.html',
     });
 
+    // Assert
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
     expect(result.error).toContain('Failed to parse form');

@@ -234,12 +234,15 @@ test.describe("Dashboard Workflow", () => {
   test("should process data and verify 25 records appear with correct statistics", async ({
     page,
   }) => {
+    // Arrange (setup in beforeEach)
+    // Act
     const processBtn = page.locator('[data-testid="process-data-btn"]');
     await expect(processBtn).toBeVisible({ timeout: 10000 });
     await processBtn.click();
 
     await page.waitForLoadState("networkidle");
 
+    // Assert
     await expect(
       page.getByText(/Successfully processed.*records/i)
     ).toBeVisible({ timeout: 10000 });
@@ -258,6 +261,7 @@ test.describe("Dashboard Workflow", () => {
   test("should handle API failure during processing and display error toast", async ({
     page,
   }) => {
+    // Arrange
     await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "POST") {
         await route.fulfill({
@@ -289,8 +293,10 @@ test.describe("Dashboard Workflow", () => {
       }
     });
 
+    // Act
     await page.locator('[data-testid="process-data-btn"]').click();
 
+    // Assert
     await expect(page.getByText(/Failed to process/i)).toBeVisible({
       timeout: 10000,
     });

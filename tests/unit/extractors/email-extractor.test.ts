@@ -13,6 +13,7 @@ describe("extractEmailData", () => {
   });
 
   it("should extract contact info from valid client inquiry email", async () => {
+    // Arrange
     const mockParsedEmail = {
       from: {
         text: "Σπύρος Μιχαήλ <spyros.michail@techcorp.gr>",
@@ -45,11 +46,13 @@ describe("extractEmailData", () => {
     vi.mocked(simpleParser).mockResolvedValue(mockParsedEmail);
 
     const emlContent = "From: Σπύρος Μιχαήλ <spyros.michail@techcorp.gr>";
+    // Act
     const result = await extractEmailData({
       emlContent,
       sourceFile: "email_01.eml",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data).toBeDefined();
     expect(result.data?.fullName).toBe("Σπύρος Μιχαήλ");
@@ -60,6 +63,7 @@ describe("extractEmailData", () => {
   });
 
   it("should detect invoice notification email", async () => {
+    // Arrange
     const mockParsedEmail = {
       from: {
         text: "billing@techflow-solutions.gr",
@@ -83,17 +87,20 @@ describe("extractEmailData", () => {
     vi.mocked(simpleParser).mockResolvedValue(mockParsedEmail);
 
     const emlContent = "Subject: Νέο Τιμολόγιο TF-2024-001";
+    // Act
     const result = await extractEmailData({
       emlContent,
       sourceFile: "invoice_notification.eml",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.emailType).toBe("invoice_notification");
     expect(result.data?.invoiceReference).toBe("TF-2024-001");
   });
 
   it("should extract invoice reference from email body", async () => {
+    // Arrange
     const mockParsedEmail = {
       from: {
         text: "billing@techflow-solutions.gr",
@@ -116,16 +123,19 @@ describe("extractEmailData", () => {
 
     vi.mocked(simpleParser).mockResolvedValue(mockParsedEmail);
 
+    // Act
     const result = await extractEmailData({
       emlContent: "Invoice notification",
       sourceFile: "invoice.eml",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.invoiceReference).toBe("TF-2024-002");
   });
 
   it("should handle missing contact info with warnings", async () => {
+    // Arrange
     const mockParsedEmail = {
       from: {
         text: "sender@example.com",
@@ -148,11 +158,13 @@ describe("extractEmailData", () => {
 
     vi.mocked(simpleParser).mockResolvedValue(mockParsedEmail);
 
+    // Act
     const result = await extractEmailData({
       emlContent: "Minimal email",
       sourceFile: "minimal.eml",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.warnings).toBeDefined();
     expect(result.warnings?.length).toBeGreaterThan(0);
@@ -160,21 +172,25 @@ describe("extractEmailData", () => {
   });
 
   it("should handle malformed email parsing errors", async () => {
+    // Arrange
     vi.mocked(simpleParser).mockRejectedValue(
       new Error("Invalid email format")
     );
 
+    // Act
     const result = await extractEmailData({
       emlContent: "Invalid email content",
       sourceFile: "invalid.eml",
     });
 
+    // Assert
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
     expect(result.error).toContain("Failed to parse email");
   });
 
   it("should handle empty email content", async () => {
+    // Arrange
     const mockParsedEmail = {
       from: { text: "", value: [], html: "" },
       to: {
@@ -193,17 +209,20 @@ describe("extractEmailData", () => {
 
     vi.mocked(simpleParser).mockResolvedValue(mockParsedEmail);
 
+    // Act
     const result = await extractEmailData({
       emlContent: "",
       sourceFile: "empty.eml",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data).toBeDefined();
     expect(result.warnings?.length).toBeGreaterThan(0);
   });
 
   it("should support Greek characters in email content", async () => {
+    // Arrange
     const mockParsedEmail = {
       from: {
         text: "Γιάννης Παπαδόπουλος <giannis@example.gr>",
@@ -231,17 +250,20 @@ Email: giannis@example.gr
 
     vi.mocked(simpleParser).mockResolvedValue(mockParsedEmail);
 
+    // Act
     const result = await extractEmailData({
       emlContent: "Greek email",
       sourceFile: "greek.eml",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.fullName).toBe("Γιάννης Παπαδόπουλος");
     expect(result.data?.company).toBe("Ελληνική Εταιρεία ΑΕ");
   });
 
   it("should fallback to from name when name not found in body", async () => {
+    // Arrange
     const mockParsedEmail = {
       from: {
         text: "John Doe <john@example.com>",
@@ -264,11 +286,13 @@ Email: giannis@example.gr
 
     vi.mocked(simpleParser).mockResolvedValue(mockParsedEmail);
 
+    // Act
     const result = await extractEmailData({
       emlContent: "Email without name",
       sourceFile: "no_name.eml",
     });
 
+    // Assert
     expect(result.success).toBe(true);
     expect(result.data?.fullName).toBe("John Doe");
   });

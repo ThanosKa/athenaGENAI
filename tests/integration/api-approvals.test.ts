@@ -65,6 +65,7 @@ test.describe("API Approvals", () => {
   });
 
   test("should approve record by ID and update UI", async ({ page }) => {
+    // Arrange
     let approvalRequestData: any = null;
     let hasApproved = false;
 
@@ -137,10 +138,12 @@ test.describe("API Approvals", () => {
       page.locator('[data-testid="record-row-record-1"]')
     ).toBeVisible({ timeout: 10000 });
 
+    // Act
     await page.locator('[data-testid="actions-menu-record-1"]').click();
 
     await page.locator('[data-testid="approve-record-btn-record-1"]').click();
 
+    // Assert
     await expect.poll(() => approvalRequestData).toBeTruthy();
     expect(approvalRequestData.action).toBe("approve");
     expect(approvalRequestData.id).toBe("record-1");
@@ -157,6 +160,7 @@ test.describe("API Approvals", () => {
   });
 
   test("should reject record by ID and update UI", async ({ page }) => {
+    // Arrange
     let rejectRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -210,10 +214,12 @@ test.describe("API Approvals", () => {
       page.locator('[data-testid="record-row-record-1"]')
     ).toBeVisible({ timeout: 10000 });
 
+    // Act
     await page.locator('[data-testid="actions-menu-record-1"]').click();
 
     await page.locator('[data-testid="reject-record-btn-record-1"]').click();
 
+    // Assert
     await expect.poll(() => rejectRequestData).toBeTruthy();
     expect(rejectRequestData.action).toBe("reject");
     expect(rejectRequestData.id).toBe("record-1");
@@ -230,6 +236,7 @@ test.describe("API Approvals", () => {
   });
 
   test("should handle non-existent record ID with error", async ({ page }) => {
+    // Arrange
     let errorRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -246,6 +253,7 @@ test.describe("API Approvals", () => {
     });
 
     await page.goto("/");
+    // Act
     await page.evaluate(() => {
       fetch("/api/approvals", {
         method: "POST",
@@ -259,6 +267,7 @@ test.describe("API Approvals", () => {
 
     await page.waitForTimeout(500);
 
+    // Assert
     expect(errorRequestData).toBeTruthy();
     expect(errorRequestData.id).toBe("non-existent-id-12345");
   });
@@ -309,6 +318,7 @@ test.describe("API Approvals", () => {
   });
 
   test("should bulk approve multiple records", async ({ page }) => {
+    // Arrange
     let bulkRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -363,6 +373,7 @@ test.describe("API Approvals", () => {
     await page.goto("/");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
+    // Act
     await page.evaluate(() => {
       fetch("/api/approvals", {
         method: "POST",
@@ -377,12 +388,14 @@ test.describe("API Approvals", () => {
 
     await page.waitForTimeout(500);
 
+    // Assert
     expect(bulkRequestData).toBeTruthy();
     expect(bulkRequestData.action).toBe("bulk_approve");
     expect(bulkRequestData.ids).toEqual(["record-1", "record-2"]);
   });
 
   test("should bulk reject multiple records", async ({ page }) => {
+    // Arrange
     let bulkRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -405,6 +418,7 @@ test.describe("API Approvals", () => {
     await page.goto("/");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
+    // Act
     await page.evaluate(() => {
       fetch("/api/approvals", {
         method: "POST",
@@ -420,6 +434,7 @@ test.describe("API Approvals", () => {
 
     await page.waitForTimeout(500);
 
+    // Assert
     expect(bulkRequestData).toBeTruthy();
     expect(bulkRequestData.action).toBe("bulk_reject");
     expect(bulkRequestData.ids).toEqual(["record-1", "record-2"]);
@@ -427,6 +442,7 @@ test.describe("API Approvals", () => {
   });
 
   test("should edit record data and update UI", async ({ page }) => {
+    // Arrange
     let editRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -489,6 +505,7 @@ test.describe("API Approvals", () => {
       page.locator('[data-testid="record-row-record-1"]')
     ).toBeVisible({ timeout: 10000 });
 
+    // Act
     await page.locator('[data-testid="actions-menu-record-1"]').click();
 
     await page.locator('[data-testid="edit-record-btn-record-1"]').click();
@@ -508,6 +525,7 @@ test.describe("API Approvals", () => {
 
     await page.locator('[data-testid="save-edit-btn"]').click();
 
+    // Assert
     await expect.poll(() => editRequestData).toBeTruthy();
     expect(editRequestData.action).toBe("edit");
     expect(editRequestData.id).toBe("record-1");
@@ -587,6 +605,7 @@ test.describe("API Approvals", () => {
   test("should verify status changes to rejected after rejection", async ({
     page,
   }) => {
+    // Arrange
     let rejectRequestData: any = null;
     let hasRejected = false;
 
@@ -651,10 +670,12 @@ test.describe("API Approvals", () => {
       page.locator('[data-testid="record-row-record-1"]')
     ).toBeVisible({ timeout: 10000 });
 
+    // Act
     await page.locator('[data-testid="actions-menu-record-1"]').click();
 
     await page.locator('[data-testid="reject-record-btn-record-1"]').click();
 
+    // Assert
     await expect.poll(() => rejectRequestData).toBeTruthy();
     expect(rejectRequestData.action).toBe("reject");
     expect(rejectRequestData.id).toBe("record-1");

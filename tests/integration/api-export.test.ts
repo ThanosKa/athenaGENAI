@@ -67,6 +67,7 @@ test.describe("API Export", () => {
   });
 
   test("should return export status information", async ({ page }) => {
+    // Arrange
     let exportStatusRequest: any = null;
 
     await page.route("/api/export", async (route) => {
@@ -87,12 +88,14 @@ test.describe("API Export", () => {
 
     await page.goto("/");
 
+    // Act
     await page.evaluate(() => {
       fetch("/api/export");
     });
 
     await page.waitForTimeout(500);
 
+    // Assert
     expect(exportStatusRequest).toBeTruthy();
     expect(exportStatusRequest.method()).toBe("GET");
   });
@@ -100,6 +103,7 @@ test.describe("API Export", () => {
   test.skip("should export approved records and update UI", async ({
     page,
   }) => {
+    // Arrange
     let exportRequestData: any = null;
     let hasExported = false;
 
@@ -176,8 +180,10 @@ test.describe("API Export", () => {
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeEnabled();
 
+    // Act
     await exportBtn.click();
 
+    // Assert
     await expect.poll(() => exportRequestData).toBeTruthy();
     expect(exportRequestData.createNew).toBe(true);
 
@@ -191,6 +197,7 @@ test.describe("API Export", () => {
   test("should handle empty export when no approved records", async ({
     page,
   }) => {
+    // Arrange
     let exportRequestData: any = null;
 
     const rejectedRecord = createMockFormRecord({
@@ -244,6 +251,7 @@ test.describe("API Export", () => {
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeDisabled();
 
+    // Act
     await page.evaluate(() => {
       fetch("/api/export", {
         method: "POST",
@@ -254,11 +262,13 @@ test.describe("API Export", () => {
 
     await page.waitForTimeout(500);
 
+    // Assert
     expect(exportRequestData).toBeTruthy();
     expect(exportRequestData.createNew).toBe(true);
   });
 
   test("should export specific records by IDs", async ({ page }) => {
+    // Arrange
     let exportRequestData: any = null;
 
     await page.route("/api/export", async (route) => {
@@ -281,6 +291,7 @@ test.describe("API Export", () => {
     await page.goto("/");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
+    // Act
     await page.evaluate(() => {
       fetch("/api/export", {
         method: "POST",
@@ -294,6 +305,7 @@ test.describe("API Export", () => {
 
     await page.waitForTimeout(500);
 
+    // Assert
     expect(exportRequestData).toBeTruthy();
     expect(exportRequestData.ids).toEqual([
       "record-approved-1",
@@ -303,6 +315,7 @@ test.describe("API Export", () => {
   });
 
   test.skip("should verify export response format", async ({ page }) => {
+    // Arrange
     let exportRequestData: any = null;
 
     await page.route("/api/extractions", async (route) => {
@@ -360,8 +373,10 @@ test.describe("API Export", () => {
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeEnabled();
 
+    // Act
     await exportBtn.click();
 
+    // Assert
     await expect.poll(() => exportRequestData).toBeTruthy();
 
     await expect(page.getByText(/exported successfully/i)).toBeVisible({
@@ -374,6 +389,7 @@ test.describe("API Export", () => {
   test("should handle export with existing spreadsheet ID", async ({
     page,
   }) => {
+    // Arrange
     let exportRequestData: any = null;
 
     await page.route("/api/export", async (route) => {
@@ -395,6 +411,7 @@ test.describe("API Export", () => {
 
     await page.goto("/");
 
+    // Act
     await page.evaluate(() => {
       fetch("/api/export", {
         method: "POST",
@@ -408,6 +425,7 @@ test.describe("API Export", () => {
 
     await page.waitForTimeout(500);
 
+    // Assert
     expect(exportRequestData).toBeTruthy();
     expect(exportRequestData.spreadsheetId).toBe("existing-spreadsheet-id");
     expect(exportRequestData.createNew).toBe(false);
@@ -416,6 +434,7 @@ test.describe("API Export", () => {
   test.skip("should verify data flow: API → Export → Status update", async ({
     page,
   }) => {
+    // Arrange
     let exportRequestData: any = null;
     let hasExported = false;
 
@@ -512,8 +531,10 @@ test.describe("API Export", () => {
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeEnabled();
 
+    // Act
     await exportBtn.click();
 
+    // Assert
     await expect.poll(() => exportRequestData).toBeTruthy();
 
     await expect(page.getByText(/exported successfully/i)).toBeVisible({
@@ -532,6 +553,7 @@ test.describe("API Export", () => {
   test.skip("should return proper error message for export failures", async ({
     page,
   }) => {
+    // Arrange
     let exportRequestData: any = null;
 
     await page.route("/api/extractions", async (route) => {
@@ -585,8 +607,10 @@ test.describe("API Export", () => {
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeEnabled();
 
+    // Act
     await exportBtn.click();
 
+    // Assert
     await expect.poll(() => exportRequestData).toBeTruthy();
 
     await expect(page.getByText(/failed to export/i)).toBeVisible({

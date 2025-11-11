@@ -1,13 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('API Extractions', () => {
-  test.beforeEach(async ({ request }) => {
-  });
+test.describe("API Extractions", () => {
+  test.beforeEach(async ({ request }) => {});
 
-  test('should retrieve all records successfully', async ({ request }) => {
-    const response = await request.get('/api/extractions');
+  test("should retrieve all records successfully", async ({ request }) => {
+    // Act
+    const response = await request.get("/api/extractions");
     const data = await response.json();
 
+    // Assert
     expect(response.status()).toBe(200);
     expect(data.success).toBe(true);
     expect(data.data).toBeDefined();
@@ -15,51 +16,62 @@ test.describe('API Extractions', () => {
     expect(data.data.statistics).toBeDefined();
   });
 
-  test('should filter records by status', async ({ request }) => {
-    await request.post('/api/extractions');
+  test("should filter records by status", async ({ request }) => {
+    // Arrange
+    await request.post("/api/extractions");
 
-    const response = await request.get('/api/extractions?status=pending');
+    // Act
+    const response = await request.get("/api/extractions?status=pending");
     const data = await response.json();
 
+    // Assert
     expect(response.status()).toBe(200);
     expect(data.success).toBe(true);
     if (data.data.records.length > 0) {
       data.data.records.forEach((record: { status: string }) => {
-        expect(record.status).toBe('pending');
+        expect(record.status).toBe("pending");
       });
     }
   });
 
-  test('should filter records by sourceType', async ({ request }) => {
-    await request.post('/api/extractions');
+  test("should filter records by sourceType", async ({ request }) => {
+    // Arrange
+    await request.post("/api/extractions");
 
-    const response = await request.get('/api/extractions?sourceType=form');
+    // Act
+    const response = await request.get("/api/extractions?sourceType=form");
     const data = await response.json();
 
+    // Assert
     expect(response.status()).toBe(200);
     expect(data.success).toBe(true);
     if (data.data.records.length > 0) {
       data.data.records.forEach((record: { sourceType: string }) => {
-        expect(record.sourceType).toBe('form');
+        expect(record.sourceType).toBe("form");
       });
     }
   });
 
-  test('should search records by query', async ({ request }) => {
-    await request.post('/api/extractions');
+  test("should search records by query", async ({ request }) => {
+    // Arrange
+    await request.post("/api/extractions");
 
-    const response = await request.get('/api/extractions?search=contact');
+    // Act
+    const response = await request.get("/api/extractions?search=contact");
     const data = await response.json();
 
+    // Assert
     expect(response.status()).toBe(200);
     expect(data.success).toBe(true);
     expect(data.data.records).toBeInstanceOf(Array);
   });
 
-  test('should return statistics with records', async ({ request }) => {
-    const response = await request.get('/api/extractions');
+  test("should return statistics with records", async ({ request }) => {
+    // Act
+    const response = await request.get("/api/extractions");
     const data = await response.json();
 
+    // Assert
     expect(response.status()).toBe(200);
     expect(data.success).toBe(true);
     expect(data.data.statistics).toBeDefined();
@@ -69,10 +81,12 @@ test.describe('API Extractions', () => {
     expect(data.data.statistics.bySource).toBeDefined();
   });
 
-  test('should process all dummy data files', async ({ request }) => {
-    const response = await request.post('/api/extractions');
+  test("should process all dummy data files", async ({ request }) => {
+    // Act
+    const response = await request.post("/api/extractions");
     const data = await response.json();
 
+    // Assert
     expect(response.status()).toBe(200);
     expect(data.success).toBe(true);
     expect(data.data.summary).toBeDefined();
@@ -82,10 +96,12 @@ test.describe('API Extractions', () => {
     expect(data.data.summary.total).toBeGreaterThanOrEqual(0);
   });
 
-  test('should return records after processing', async ({ request }) => {
-    const response = await request.post('/api/extractions');
+  test("should return records after processing", async ({ request }) => {
+    // Act
+    const response = await request.post("/api/extractions");
     const data = await response.json();
 
+    // Assert
     expect(response.status()).toBe(200);
     expect(data.success).toBe(true);
     expect(data.data.records).toBeDefined();
@@ -94,27 +110,34 @@ test.describe('API Extractions', () => {
     expect(data.data.records.invoices).toBeInstanceOf(Array);
   });
 
-  test('should handle extraction failures gracefully', async ({ request }) => {
-    const response = await request.post('/api/extractions');
+  test("should handle extraction failures gracefully", async ({ request }) => {
+    // Act
+    const response = await request.post("/api/extractions");
     const data = await response.json();
 
+    // Assert
     expect(response.status()).toBeLessThan(500);
     expect(data).toBeDefined();
   });
 
-  test('should verify data flow: API → Storage → API response', async ({ request }) => {
-    const postResponse = await request.post('/api/extractions');
+  test("should verify data flow: API → Storage → API response", async ({
+    request,
+  }) => {
+    // Act
+    const postResponse = await request.post("/api/extractions");
     const postData = await postResponse.json();
 
+    // Assert
     expect(postResponse.status()).toBe(200);
     expect(postData.success).toBe(true);
 
-    const getResponse = await request.get('/api/extractions');
+    // Act
+    const getResponse = await request.get("/api/extractions");
     const getData = await getResponse.json();
 
+    // Assert
     expect(getResponse.status()).toBe(200);
     expect(getData.success).toBe(true);
     expect(getData.data.records.length).toBeGreaterThanOrEqual(0);
   });
 });
-
