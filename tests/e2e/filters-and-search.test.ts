@@ -226,7 +226,7 @@ test.describe("Filters and Search", () => {
     await page.waitForTimeout(300); // Wait for dropdown portal to render
 
     // Select Pending
-    await page.locator("text=Pending").click();
+    await page.getByRole('option', { name: 'Pending' }).click();
 
     // Wait for filtered results
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
@@ -252,7 +252,7 @@ test.describe("Filters and Search", () => {
     await page.waitForTimeout(300); // Wait for dropdown portal to render
 
     // Select Forms
-    await page.locator("text=Forms").click();
+    await page.getByRole('option', { name: 'Forms' }).click();
 
     // Wait for filtered results
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
@@ -296,12 +296,12 @@ test.describe("Filters and Search", () => {
     // Set status filter to Pending
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300); // Wait for dropdown portal to render
-    await page.locator("text=Pending").click();
+    await page.getByRole('option', { name: 'Pending' }).click();
 
     // Set source filter to Form
     await page.locator('[data-testid="filter-source-select"]').click();
     await page.waitForTimeout(300); // Wait for dropdown portal to render
-    await page.locator("text=Forms").click();
+    await page.getByRole('option', { name: 'Forms' }).click();
 
     // Add search query
     await page.locator('[data-testid="search-input"]').fill("John");
@@ -321,7 +321,7 @@ test.describe("Filters and Search", () => {
     // Apply filters
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300); // Wait for dropdown portal to render
-    await page.locator("text=Pending").click();
+    await page.getByRole('option', { name: 'Pending' }).click();
 
     // Verify filtered results
     let rows = page.locator('[data-testid^="record-row-"]');
@@ -330,7 +330,10 @@ test.describe("Filters and Search", () => {
     // Reset to "All"
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300); // Wait for dropdown portal to render
-    await page.locator("text=All").click();
+    await page.getByRole('option', { name: 'All' }).click();
+
+    // Wait for filtered results
+    await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
     // Verify all records are shown again
     await expect(rows).toHaveCount(3);

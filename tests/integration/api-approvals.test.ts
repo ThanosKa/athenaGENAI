@@ -68,11 +68,13 @@ test.describe("API Approvals", () => {
 
   test("should approve record by ID and update UI", async ({ page }) => {
     let approvalRequestData: any = null;
+    let hasApproved = false;
 
     // Mock /api/approvals POST
     await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         approvalRequestData = await route.request().postDataJSON();
+        hasApproved = true; // Set flag when approved
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -89,16 +91,19 @@ test.describe("API Approvals", () => {
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
 
-        const approvedRecord = createMockFormRecord({
+        // Return APPROVED only after action performed
+        const record1 = createMockFormRecord({
           id: "record-1",
-          status: ExtractionStatus.APPROVED,
+          status: hasApproved
+            ? ExtractionStatus.APPROVED
+            : ExtractionStatus.PENDING,
         });
         const mockRecord2 = createMockFormRecord({
           id: "record-2",
           status: ExtractionStatus.PENDING,
         });
 
-        let records = [approvedRecord, mockRecord2];
+        let records = [record1, mockRecord2];
         if (statusFilter && statusFilter !== "all") {
           records = records.filter((r) => r.status === statusFilter);
         }
@@ -156,10 +161,13 @@ test.describe("API Approvals", () => {
       timeout: 5000,
     });
 
+    // Wait for UI to refetch and update
+    await page.waitForLoadState("networkidle");
+
     // Verify status badge updated
     await expect(
       page.locator('[data-testid="status-badge-record-1"]')
-    ).toContainText("Approved");
+    ).toContainText("Approved", { timeout: 10000 });
   });
 
   test("should reject record by ID and update UI", async ({ page }) => {
@@ -236,10 +244,13 @@ test.describe("API Approvals", () => {
       timeout: 5000,
     });
 
+    // Wait for UI to refetch and update
+    await page.waitForLoadState("networkidle");
+
     // Verify status badge updated
     await expect(
       page.locator('[data-testid="status-badge-record-1"]')
-    ).toContainText("Rejected");
+    ).toContainText("Rejected", { timeout: 10000 });
   });
 
   test("should handle non-existent record ID with error", async ({ page }) => {
@@ -635,11 +646,13 @@ test.describe("API Approvals", () => {
     page,
   }) => {
     let rejectRequestData: any = null;
+    let hasRejected = false;
 
     // Mock /api/approvals POST
     await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         rejectRequestData = await route.request().postDataJSON();
+        hasRejected = true; // Set flag when rejected
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -656,9 +669,12 @@ test.describe("API Approvals", () => {
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
 
+        // Return REJECTED only after action performed
         const rejectedRecord = createMockFormRecord({
           id: "record-1",
-          status: ExtractionStatus.REJECTED,
+          status: hasRejected
+            ? ExtractionStatus.REJECTED
+            : ExtractionStatus.PENDING,
         });
 
         let records = [rejectedRecord];
@@ -674,9 +690,9 @@ test.describe("API Approvals", () => {
               records,
               statistics: {
                 total: records.length,
-                pending: 0,
+                pending: hasRejected ? 0 : records.length,
                 approved: 0,
-                rejected: records.length,
+                rejected: hasRejected ? records.length : 0,
                 exported: 0,
                 failed: 0,
                 bySource: { forms: records.length, emails: 0, invoices: 0 },
