@@ -21,6 +21,10 @@ The system processes dummy data files including 5 contact forms, 10 email messag
 
 ## Documentation
 
+### User Documentation
+
+- **[User Manual](USER_MANUAL.md)** - Comprehensive guide for using the dashboard interface. Covers getting started, all workflows (processing, reviewing, editing, approving/rejecting, exporting), understanding statuses and badges, filtering and searching, troubleshooting, and FAQ. **Essential reading for all users.**
+
 ### Business & Technical Documents
 
 For a complete understanding of the project, business case, and implementation details, please review:
