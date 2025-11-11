@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run clean",
     "build": "next build",
     "start": "next start",
     "clean": "rimraf .next",
