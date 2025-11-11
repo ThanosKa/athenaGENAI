@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Check, X } from "lucide-react";
+import { Check, X, Edit } from "lucide-react";
 
 export function ExtractionReview({
   record,
@@ -134,7 +134,7 @@ export function ExtractionReview({
                 variant="outline"
                 onClick={() => {
                   setEditedData(record.data);
-                  onClose();
+                  setIsEditing(false);
                 }}
                 data-testid="cancel-edit-btn"
               >
@@ -142,7 +142,7 @@ export function ExtractionReview({
               </Button>
             </div>
           ) : (
-            // View mode: Show Approve/Reject buttons
+            // View mode: Show Approve/Reject/Edit buttons
             <div className="flex gap-2">
               <Button
                 variant="default"
@@ -160,6 +160,14 @@ export function ExtractionReview({
               >
                 <X className="h-4 w-4 mr-2" />
                 Reject
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(true)}
+                data-testid="enable-edit-btn"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
               </Button>
             </div>
           )}

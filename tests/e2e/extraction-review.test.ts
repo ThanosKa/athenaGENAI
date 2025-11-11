@@ -139,7 +139,13 @@ test.describe("Extraction Review Dialog", () => {
     await expect(page.locator('[data-testid="field-fullName"]')).toHaveValue(
       "John Doe"
     );
-    await expect(page.locator("text=contact_form_1.html")).toBeVisible();
+    // FIX: Use more specific locator to avoid strict mode violation
+    // Only check inside the dialog, not the table row
+    await expect(
+      page
+        .locator('[data-testid="extraction-dialog"]')
+        .getByText("contact_form_1.html")
+    ).toBeVisible();
 
     // Verify warning badge is displayed
     await expect(page.locator('[data-testid="warnings-alert"]')).toBeVisible();
@@ -208,10 +214,61 @@ test.describe("Extraction Review Dialog", () => {
       page.locator("text=/Missing phone validation/i")
     ).toBeVisible();
 
-    // Verify warning badge in list (if we open it again)
-    await page.locator('[data-testid="actions-menu-record-1"]').click();
+    // Close dialog if it's still open (from beforeEach)
+    const dialogLocator = page.locator('[data-testid="extraction-dialog"]');
+    const isDialogVisible = await dialogLocator.isVisible().catch(() => false);
+
+    if (isDialogVisible) {
+      // Try to find and click close button
+      const closeButton = page.locator(
+        '[data-testid="close-dialog-btn"], button[aria-label*="close" i], button[aria-label*="Close" i]'
+      );
+      const closeButtonCount = await closeButton.count();
+
+      if (closeButtonCount > 0) {
+        await closeButton.first().click();
+      } else {
+        // Press Escape key to close dialog
+        await page.keyboard.press("Escape");
+      }
+
+      // Wait for dialog to be fully closed
+      await expect(dialogLocator).not.toBeVisible({ timeout: 5000 });
+
+      // Wait for modal overlay to be removed
+      await page
+        .waitForFunction(
+          () => {
+            const overlays = document.querySelectorAll(
+              'div[data-state="open"][class*="bg-black/80"]'
+            );
+            return overlays.length === 0;
+          },
+          { timeout: 5000 }
+        )
+        .catch(() => {
+          // Modal overlay may still be present, continue anyway
+        });
+
+      // Wait for network to be idle and animations to settle
+      await page.waitForLoadState("networkidle");
+      await page.waitForTimeout(500);
+    }
+
+    // Verify warning badge in list (reopen dialog)
+    const actionsMenuButton = page.locator(
+      '[data-testid="actions-menu-record-1"]'
+    );
+    await actionsMenuButton.click();
     await page.waitForTimeout(300); // Wait for dropdown menu to render
     await page.locator('[data-testid="view-record-btn-record-1"]').click();
+
+    // Wait for dialog to open
+    await expect(page.locator('[data-testid="extraction-dialog"]')).toBeVisible(
+      {
+        timeout: 10000,
+      }
+    );
 
     // Warning should still be visible
     await expect(page.locator('[data-testid="warnings-alert"]')).toBeVisible();
