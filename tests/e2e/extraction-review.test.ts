@@ -66,7 +66,7 @@ test.describe("Extraction Review Dialog", () => {
       }
     });
 
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       const body = await route.request().postDataJSON();
       if (body.action === "edit") {
         // Update the mock record with edited data

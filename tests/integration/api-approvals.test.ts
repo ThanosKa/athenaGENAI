@@ -20,7 +20,7 @@ test.describe("API Approvals", () => {
     });
 
     // Mock /api/extractions GET - return mock records
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "GET") {
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
@@ -70,7 +70,7 @@ test.describe("API Approvals", () => {
     let approvalRequestData: any = null;
 
     // Mock /api/approvals POST
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         approvalRequestData = await route.request().postDataJSON();
         await route.fulfill({
@@ -84,7 +84,7 @@ test.describe("API Approvals", () => {
     });
 
     // Mock updated /api/extractions after approval
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "GET") {
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
@@ -166,7 +166,7 @@ test.describe("API Approvals", () => {
     let rejectRequestData: any = null;
 
     // Mock /api/approvals POST
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         rejectRequestData = await route.request().postDataJSON();
         await route.fulfill({
@@ -180,7 +180,7 @@ test.describe("API Approvals", () => {
     });
 
     // Mock updated /api/extractions after rejection
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "GET") {
         const rejectedRecord = createMockFormRecord({
           id: "record-1",
@@ -246,7 +246,7 @@ test.describe("API Approvals", () => {
     let errorRequestData: any = null;
 
     // Mock /api/approvals POST to return error
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         errorRequestData = await route.request().postDataJSON();
         await route.fulfill({
@@ -288,7 +288,7 @@ test.describe("API Approvals", () => {
       status: ExtractionStatus.APPROVED,
     });
 
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "GET") {
         await route.fulfill({
           status: 200,
@@ -333,7 +333,7 @@ test.describe("API Approvals", () => {
     let bulkRequestData: any = null;
 
     // Mock /api/approvals POST for bulk approve
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         bulkRequestData = await route.request().postDataJSON();
         await route.fulfill({
@@ -351,7 +351,7 @@ test.describe("API Approvals", () => {
     });
 
     // Mock updated records after bulk approve
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "GET") {
         const approved1 = createMockFormRecord({
           id: "record-1",
@@ -411,7 +411,7 @@ test.describe("API Approvals", () => {
     let bulkRequestData: any = null;
 
     // Mock /api/approvals POST for bulk reject
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         bulkRequestData = await route.request().postDataJSON();
         await route.fulfill({
@@ -458,7 +458,7 @@ test.describe("API Approvals", () => {
     let editRequestData: any = null;
 
     // Mock /api/approvals POST for edit
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         editRequestData = await route.request().postDataJSON();
         await route.fulfill({
@@ -472,7 +472,7 @@ test.describe("API Approvals", () => {
     });
 
     // Mock updated record after edit
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "GET") {
         const editedRecord = createMockFormRecord({
           id: "record-1",
@@ -563,7 +563,7 @@ test.describe("API Approvals", () => {
     let errorRequestData: any = null;
 
     // Mock /api/approvals POST to return error
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         errorRequestData = await route.request().postDataJSON();
         await route.fulfill({
@@ -600,7 +600,7 @@ test.describe("API Approvals", () => {
     let errorRequestData: any = null;
 
     // Mock /api/approvals POST to return error
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         errorRequestData = await route.request().postDataJSON();
         await route.fulfill({
@@ -637,7 +637,7 @@ test.describe("API Approvals", () => {
     let rejectRequestData: any = null;
 
     // Mock /api/approvals POST
-    await page.route("/api/approvals", async (route) => {
+    await page.route("/api/approvals**", async (route) => {
       if (route.request().method() === "POST") {
         rejectRequestData = await route.request().postDataJSON();
         await route.fulfill({
@@ -651,7 +651,7 @@ test.describe("API Approvals", () => {
     });
 
     // Mock updated /api/extractions after rejection
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "GET") {
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
