@@ -37,10 +37,10 @@ The AthenaGen AI Data Extraction Dashboard is a human-in-the-loop automation sys
 
 **Important:** This system does NOT work automatically. You have complete control:
 
-- ✅ All extractions require your approval before being saved
-- ✅ You can edit any data before approving
-- ✅ You can reject any extraction you don't want
-- ✅ Nothing is exported to Google Sheets without your explicit approval
+- All extractions require your approval before being saved
+- You can edit any data before approving
+- You can reject any extraction you don't want
+- Nothing is exported to Google Sheets without your explicit approval
 
 **You are always in control.** The system helps you work faster, but you make all the decisions.
 
@@ -551,12 +551,12 @@ Each record has a status badge showing its current state:
 
 | Status       | Badge Color  | Meaning                            | Can Edit? | Can Approve? | Can Export? |
 | ------------ | ------------ | ---------------------------------- | --------- | ------------ | ----------- |
-| **Pending**  | Yellow/Amber | Waiting for your review            | ✅ Yes    | ✅ Yes       | ❌ No       |
-| **Approved** | Green        | You approved this record           | ❌ No     | ❌ No        | ✅ Yes      |
-| **Rejected** | Red          | You rejected this record           | ❌ No     | ❌ No        | ❌ No       |
-| **Edited**   | Blue         | You edited this record             | ✅ Yes    | ✅ Yes       | ❌ No       |
-| **Exported** | Blue/Gray    | Successfully sent to Google Sheets | ❌ No     | ❌ No        | ❌ No       |
-| **Failed**   | Red          | Extraction failed completely       | ❌ No     | ❌ No        | ❌ No       |
+| **Pending**  | Yellow/Amber | Waiting for your review            | Yes       | Yes          | No          |
+| **Approved** | Green        | You approved this record           | No        | No           | Yes         |
+| **Rejected** | Red          | You rejected this record           | No        | No           | No          |
+| **Edited**   | Blue         | You edited this record             | Yes       | Yes          | No          |
+| **Exported** | Blue/Gray    | Successfully sent to Google Sheets | No        | No           | No          |
+| **Failed**   | Red          | Extraction failed completely       | No        | No           | No          |
 
 ### Status Workflow
 
@@ -986,10 +986,10 @@ Currently, no keyboard shortcuts are available. All actions use mouse/touch.
 
 You now have everything you need to use the AthenaGen AI Data Extraction Dashboard effectively. Remember:
 
-- ✅ **You're in control** - Nothing happens without your approval
-- ✅ **Review everything** - Quality control is important
-- ✅ **Edit when needed** - Fix mistakes before approving
-- ✅ **Export approved records** - Send clean data to Google Sheets
+- **You're in control** - Nothing happens without your approval
+- **Review everything** - Quality control is important
+- **Edit when needed** - Fix mistakes before approving
+- **Export approved records** - Send clean data to Google Sheets
 
 **Happy processing!**
 
