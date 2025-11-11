@@ -408,7 +408,7 @@ test.describe("Dashboard Workflow", () => {
     page,
   }) => {
     // Override route to return error
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "POST") {
         await route.fulfill({
           status: 500,
@@ -530,16 +530,12 @@ test.describe("Dashboard Workflow", () => {
       return mockRecords;
     };
 
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       const method = route.request().method();
-      console.log(`\n🔵 API CALL: ${method} /api/extractions`);
 
       if (method === "POST") {
         postProcessed = true;
         allRecords = createMockRecords();
-        console.log(
-          `✅ POST processed - Generated ${allRecords.length} records`
-        );
 
         await route.fulfill({
           status: 200,
@@ -558,16 +554,10 @@ test.describe("Dashboard Workflow", () => {
       } else {
         // GET request
         getRequestCount++;
-        console.log(
-          `📥 GET request #${getRequestCount} - postProcessed: ${postProcessed}, Records available: ${allRecords.length}`
-        );
 
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
         const sourceFilter = url.searchParams.get("sourceType");
-        console.log(
-          `   Filters - status: ${statusFilter}, sourceType: ${sourceFilter}`
-        );
 
         let filteredRecords = allRecords;
 
@@ -624,12 +614,6 @@ test.describe("Dashboard Workflow", () => {
             },
           },
         };
-
-        console.log(`   Returning ${filteredRecords.length} records`);
-        console.log(
-          `   Statistics:`,
-          JSON.stringify(responseData.data.statistics, null, 2)
-        );
 
         await route.fulfill({
           status: 200,

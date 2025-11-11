@@ -93,7 +93,7 @@ test.describe("Filters and Search", () => {
       },
     ];
 
-    await page.route("/api/extractions", async (route) => {
+    await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "POST") {
         // Mock successful processing
         await route.fulfill({
