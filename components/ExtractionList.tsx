@@ -47,8 +47,8 @@ export function ExtractionList({
     return (
       <Alert>
         <AlertDescription>
-          No extraction records found. Click "Process Data" to start extracting
-          data from files.
+          No extraction records found. Click &quot;Process Data&quot; to start
+          extracting data from files.
         </AlertDescription>
       </Alert>
     );

@@ -1,13 +1,11 @@
 import { expect } from "@playwright/test";
 import { test } from "@/tests/fixtures";
-import { ExtractionStatus, SourceType } from "@/types/data";
+import { ExtractionStatus, SourceType, ExtractionRecord } from "@/types/data";
 
 test.describe("Dashboard Workflow", () => {
   test.beforeEach(async ({ page }) => {
-    let postProcessed = false;
-
-    const createMockRecords = (): any[] => {
-      const mockRecords: any[] = [];
+    const createMockRecords = (): ExtractionRecord[] => {
+      const mockRecords: ExtractionRecord[] = [];
 
       for (let i = 1; i <= 5; i++) {
         mockRecords.push({
@@ -15,7 +13,7 @@ test.describe("Dashboard Workflow", () => {
           sourceType: SourceType.FORM,
           sourceFile: `contact_form_${i}.html`,
           status: ExtractionStatus.PENDING,
-          extractedAt: new Date().toISOString(),
+          extractedAt: new Date().toISOString() as unknown as Date,
           data: {
             fullName: `Form User ${i}`,
             email: `form${i}@example.com`,
@@ -36,7 +34,7 @@ test.describe("Dashboard Workflow", () => {
           sourceType: SourceType.EMAIL,
           sourceFile: `email_${i.toString().padStart(2, "0")}.eml`,
           status: ExtractionStatus.PENDING,
-          extractedAt: new Date().toISOString(),
+          extractedAt: new Date().toISOString() as unknown as Date,
           data: {
             from: `sender${i}@example.com`,
             fromEmail: `sender${i}@example.com`,
@@ -60,7 +58,7 @@ test.describe("Dashboard Workflow", () => {
           sourceType: SourceType.INVOICE,
           sourceFile: `invoice_TF-2024-${i.toString().padStart(3, "0")}.html`,
           status: ExtractionStatus.PENDING,
-          extractedAt: new Date().toISOString(),
+          extractedAt: new Date().toISOString() as unknown as Date,
           data: {
             invoiceNumber: `TF-2024-${i.toString().padStart(3, "0")}`,
             date: "2024-01-15",
@@ -78,11 +76,10 @@ test.describe("Dashboard Workflow", () => {
       return mockRecords;
     };
 
-    let allRecords: any[] = [];
+    let allRecords: ExtractionRecord[] = [];
 
     await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "POST") {
-        postProcessed = true;
         allRecords = createMockRecords();
         await route.fulfill({
           status: 200,

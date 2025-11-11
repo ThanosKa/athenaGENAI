@@ -66,6 +66,7 @@ test.describe("API Approvals", () => {
 
   test("should approve record by ID and update UI", async ({ page }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let approvalRequestData: any = null;
     let hasApproved = false;
 
@@ -161,6 +162,7 @@ test.describe("API Approvals", () => {
 
   test("should reject record by ID and update UI", async ({ page }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let rejectRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -237,6 +239,7 @@ test.describe("API Approvals", () => {
 
   test("should handle non-existent record ID with error", async ({ page }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let errorRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -319,6 +322,7 @@ test.describe("API Approvals", () => {
 
   test("should bulk approve multiple records", async ({ page }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let bulkRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -396,6 +400,7 @@ test.describe("API Approvals", () => {
 
   test("should bulk reject multiple records", async ({ page }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let bulkRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -443,6 +448,7 @@ test.describe("API Approvals", () => {
 
   test("should edit record data and update UI", async ({ page }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let editRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -537,6 +543,7 @@ test.describe("API Approvals", () => {
   });
 
   test("should return error for invalid action", async ({ page }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let errorRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -571,6 +578,7 @@ test.describe("API Approvals", () => {
   });
 
   test("should return error when action is missing", async ({ page }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let errorRequestData: any = null;
 
     await page.route("/api/approvals**", async (route) => {
@@ -606,6 +614,7 @@ test.describe("API Approvals", () => {
     page,
   }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let rejectRequestData: any = null;
     let hasRejected = false;
 

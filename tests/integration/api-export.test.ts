@@ -68,6 +68,7 @@ test.describe("API Export", () => {
 
   test("should return export status information", async ({ page }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let exportStatusRequest: any = null;
 
     await page.route("/api/export", async (route) => {
@@ -104,6 +105,7 @@ test.describe("API Export", () => {
     page,
   }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let exportRequestData: any = null;
     let hasExported = false;
 
@@ -198,6 +200,7 @@ test.describe("API Export", () => {
     page,
   }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let exportRequestData: any = null;
 
     const rejectedRecord = createMockFormRecord({
@@ -269,6 +272,7 @@ test.describe("API Export", () => {
 
   test("should export specific records by IDs", async ({ page }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let exportRequestData: any = null;
 
     await page.route("/api/export", async (route) => {
@@ -316,6 +320,7 @@ test.describe("API Export", () => {
 
   test.skip("should verify export response format", async ({ page }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let exportRequestData: any = null;
 
     await page.route("/api/extractions", async (route) => {
@@ -390,6 +395,7 @@ test.describe("API Export", () => {
     page,
   }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let exportRequestData: any = null;
 
     await page.route("/api/export", async (route) => {
@@ -435,6 +441,7 @@ test.describe("API Export", () => {
     page,
   }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let exportRequestData: any = null;
     let hasExported = false;
 
@@ -554,6 +561,7 @@ test.describe("API Export", () => {
     page,
   }) => {
     // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let exportRequestData: any = null;
 
     await page.route("/api/extractions", async (route) => {

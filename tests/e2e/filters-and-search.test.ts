@@ -213,7 +213,7 @@ test.describe("Filters and Search", () => {
     // Act
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300);
-    await page.getByRole('option', { name: 'Pending' }).click();
+    await page.getByRole("option", { name: "Pending" }).click();
 
     // Assert
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
@@ -236,7 +236,7 @@ test.describe("Filters and Search", () => {
     // Act
     await page.locator('[data-testid="filter-source-select"]').click();
     await page.waitForTimeout(300);
-    await page.getByRole('option', { name: 'Forms' }).click();
+    await page.getByRole("option", { name: "Forms" }).click();
 
     // Assert
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
@@ -277,11 +277,11 @@ test.describe("Filters and Search", () => {
     // Act
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300);
-    await page.getByRole('option', { name: 'Pending' }).click();
+    await page.getByRole("option", { name: "Pending" }).click();
 
     await page.locator('[data-testid="filter-source-select"]').click();
     await page.waitForTimeout(300);
-    await page.getByRole('option', { name: 'Forms' }).click();
+    await page.getByRole("option", { name: "Forms" }).click();
 
     await page.locator('[data-testid="search-input"]').fill("John");
 
@@ -299,15 +299,15 @@ test.describe("Filters and Search", () => {
     // Arrange (setup in beforeEach)
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300);
-    await page.getByRole('option', { name: 'Pending' }).click();
+    await page.getByRole("option", { name: "Pending" }).click();
 
-    let rows = page.locator('[data-testid^="record-row-"]');
+    const rows = page.locator('[data-testid^="record-row-"]');
     await expect(rows).toHaveCount(2);
 
     // Act
     await page.locator('[data-testid="filter-status-select"]').click();
     await page.waitForTimeout(300);
-    await page.getByRole('option', { name: 'All' }).click();
+    await page.getByRole("option", { name: "All" }).click();
 
     // Assert
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();

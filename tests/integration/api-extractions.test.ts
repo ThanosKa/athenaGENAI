@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("API Extractions", () => {
-  test.beforeEach(async ({ request }) => {});
+  test.beforeEach(async () => {});
 
   test("should retrieve all records successfully", async ({ request }) => {
     // Act

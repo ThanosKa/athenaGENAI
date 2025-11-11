@@ -6,7 +6,6 @@ import {
   ExtractionStatus,
   SourceType,
   ExtractedFormData,
-  ExtractedEmailData,
   ExtractedInvoiceData,
 } from "@/types/data";
 

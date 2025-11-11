@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ExtractionRecord,
   ExtractionStatus,
@@ -55,7 +55,7 @@ export default function DashboardPage() {
   const [filterSource, setFilterSource] = useState<SourceType | "all">("all");
   const [search, setSearch] = useState("");
 
-  const loadExtractions = async () => {
+  const loadExtractions = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (filterStatus && filterStatus !== "all")
@@ -79,11 +79,11 @@ export default function DashboardPage() {
     } finally {
       setInitialLoading(false);
     }
-  };
+  }, [filterStatus, filterSource, search]);
 
   useEffect(() => {
     loadExtractions();
-  }, [filterStatus, filterSource, search]);
+  }, [loadExtractions]);
 
   const handleProcessData = async () => {
     setLoading(true);

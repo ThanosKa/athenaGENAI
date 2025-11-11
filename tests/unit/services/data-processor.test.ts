@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { dataProcessor } from "@/lib/services/data-processor";
 import { storageService } from "@/lib/services/storage";
 import { promises as fs, type PathLike } from "fs";
-import path from "path";
 
 vi.mock("@/lib/extractors/form-extractor", () => ({
   extractFormData: vi.fn(),

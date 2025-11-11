@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ExtractionRecord,
   SourceType,
@@ -46,11 +46,6 @@ export function ExtractionReview({
   const [isEditing, setIsEditing] = useState(initialEditMode);
   const [editedData, setEditedData] = useState(record.data);
 
-  useEffect(() => {
-    setIsEditing(initialEditMode);
-    setEditedData(record.data);
-  }, [record.id, initialEditMode]);
-
   const handleSave = () => {
     onSaveEdit(editedData);
     setIsEditing(false);
@@ -63,111 +58,113 @@ export function ExtractionReview({
   };
 
   return (
-    <Dialog open={true} onOpenChange={handleOpenChange}>
-      <DialogContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto"
-        data-testid="extraction-dialog"
-      >
-        <DialogHeader>
-          <DialogTitle>Extraction Review</DialogTitle>
-          <DialogDescription>{record.sourceFile}</DialogDescription>
-        </DialogHeader>
+    <div key={record.id}>
+      <Dialog open={true} onOpenChange={handleOpenChange}>
+        <DialogContent
+          className="max-w-2xl max-h-[90vh] overflow-y-auto"
+          data-testid="extraction-dialog"
+        >
+          <DialogHeader>
+            <DialogTitle>Extraction Review</DialogTitle>
+            <DialogDescription>{record.sourceFile}</DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-4">
-          {record.warnings.length > 0 && (
-            <Alert variant="warning" data-testid="warnings-alert">
-              <AlertTitle>Warnings</AlertTitle>
-              <AlertDescription>
-                <ul className="list-disc list-inside space-y-1">
-                  {record.warnings.map((warning, idx) => (
-                    <li key={idx}>{warning}</li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
+          <div className="space-y-4">
+            {record.warnings.length > 0 && (
+              <Alert variant="warning" data-testid="warnings-alert">
+                <AlertTitle>Warnings</AlertTitle>
+                <AlertDescription>
+                  <ul className="list-disc list-inside space-y-1">
+                    {record.warnings.map((warning, idx) => (
+                      <li key={idx}>{warning}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
 
-          {record.error && (
-            <Alert variant="destructive" data-testid="error-alert">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{record.error}</AlertDescription>
-            </Alert>
-          )}
+            {record.error && (
+              <Alert variant="destructive" data-testid="error-alert">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{record.error}</AlertDescription>
+              </Alert>
+            )}
 
-          {record.sourceType === SourceType.FORM && (
-            <FormDataFields
-              data={editedData as ExtractedFormData}
-              isEditing={isEditing}
-              onChange={setEditedData}
-            />
-          )}
+            {record.sourceType === SourceType.FORM && (
+              <FormDataFields
+                data={editedData as ExtractedFormData}
+                isEditing={isEditing}
+                onChange={setEditedData}
+              />
+            )}
 
-          {record.sourceType === SourceType.EMAIL && (
-            <EmailDataFields
-              data={editedData as ExtractedEmailData}
-              isEditing={isEditing}
-              onChange={setEditedData}
-            />
-          )}
+            {record.sourceType === SourceType.EMAIL && (
+              <EmailDataFields
+                data={editedData as ExtractedEmailData}
+                isEditing={isEditing}
+                onChange={setEditedData}
+              />
+            )}
 
-          {record.sourceType === SourceType.INVOICE && (
-            <InvoiceDataFields
-              data={editedData as ExtractedInvoiceData}
-              isEditing={isEditing}
-              onChange={setEditedData}
-            />
-          )}
-        </div>
+            {record.sourceType === SourceType.INVOICE && (
+              <InvoiceDataFields
+                data={editedData as ExtractedInvoiceData}
+                isEditing={isEditing}
+                onChange={setEditedData}
+              />
+            )}
+          </div>
 
-        <DialogFooter className="flex justify-between sm:justify-between">
-          {isEditing ? (
-            <div className="flex gap-2">
-              <Button onClick={handleSave} data-testid="save-edit-btn">
-                Save Changes
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEditedData(record.data);
-                  setIsEditing(false);
-                }}
-                data-testid="cancel-edit-btn"
-              >
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <Button
-                variant="default"
-                onClick={onApprove}
-                className="bg-green-500 hover:bg-green-600 text-white"
-                data-testid="approve-btn"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                Approve
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={onReject}
-                data-testid="reject-btn"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Reject
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setIsEditing(true)}
-                data-testid="enable-edit-btn"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            </div>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter className="flex justify-between sm:justify-between">
+            {isEditing ? (
+              <div className="flex gap-2">
+                <Button onClick={handleSave} data-testid="save-edit-btn">
+                  Save Changes
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditedData(record.data);
+                    setIsEditing(false);
+                  }}
+                  data-testid="cancel-edit-btn"
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  variant="default"
+                  onClick={onApprove}
+                  className="bg-green-500 hover:bg-green-600 text-white"
+                  data-testid="approve-btn"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Approve
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={onReject}
+                  data-testid="reject-btn"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Reject
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditing(true)}
+                  data-testid="enable-edit-btn"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+              </div>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 

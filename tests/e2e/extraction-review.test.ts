@@ -1,15 +1,15 @@
 import { expect } from "@playwright/test";
 import { test } from "@/tests/fixtures";
-import { ExtractionStatus, SourceType } from "@/types/data";
+import { ExtractionStatus, SourceType, ExtractionRecord } from "@/types/data";
 
 test.describe("Extraction Review Dialog", () => {
   test.beforeEach(async ({ page }) => {
-    const mockRecord: any = {
+    const mockRecord: ExtractionRecord = {
       id: "record-1",
       sourceType: SourceType.FORM,
       sourceFile: "contact_form_1.html",
       status: ExtractionStatus.PENDING,
-      extractedAt: new Date().toISOString(),
+      extractedAt: new Date(),
       data: {
         fullName: "John Doe",
         email: "john@example.com",

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { exportService } from '@/lib/services/export-service';
 import { storageService } from '@/lib/services/storage';
-import { approvalService } from '@/lib/services/approval-service';
 import {
   ExtractionRecord,
   ExtractionStatus,
