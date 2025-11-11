@@ -74,27 +74,22 @@ export async function GET() {
   try {
     const hasEnvVar = !!process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
 
-    console.log(
-      "[Export API] GET /api/export - Checking environment variable..."
-    );
-    console.log("[Export API] GOOGLE_SERVICE_ACCOUNT_KEY exists:", hasEnvVar);
-
     if (hasEnvVar) {
       try {
         const envKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY!;
-        const parsed = JSON.parse(envKey);
-        console.log(
-          "[Export API] Credentials JSON is valid. Project ID:",
-          parsed.project_id || "N/A"
-        );
+        JSON.parse(envKey);
       } catch (parseError) {
-        console.error(
-          "[Export API] WARNING: GOOGLE_SERVICE_ACCOUNT_KEY exists but is not valid JSON"
+        logger.warn(
+          "GOOGLE_SERVICE_ACCOUNT_KEY exists but is not valid JSON",
+          parseError,
+          "API:Export"
         );
       }
     } else {
-      console.log(
-        "[Export API] WARNING: GOOGLE_SERVICE_ACCOUNT_KEY is not set"
+      logger.warn(
+        "GOOGLE_SERVICE_ACCOUNT_KEY is not set",
+        undefined,
+        "API:Export"
       );
     }
 
