@@ -1,8 +1,8 @@
 export enum LogLevel {
-  DEBUG = 'debug',
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error',
+  DEBUG = "debug",
+  INFO = "info",
+  WARN = "warn",
+  ERROR = "error",
 }
 
 interface LogEntry {
@@ -61,7 +61,7 @@ export class Logger {
       this.logs.shift();
     }
 
-    const prefix = context ? `[${context}]` : '';
+    const prefix = context ? `[${context}]` : "";
     const timestamp = entry.timestamp.toISOString();
 
     switch (level) {
@@ -81,7 +81,12 @@ export class Logger {
   }
 
   private shouldLog(level: LogLevel): boolean {
-    const levels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR];
+    const levels = [
+      LogLevel.DEBUG,
+      LogLevel.INFO,
+      LogLevel.WARN,
+      LogLevel.ERROR,
+    ];
     const currentIndex = levels.indexOf(level);
     const minIndex = levels.indexOf(this.minLevel);
     return currentIndex >= minIndex;
@@ -92,11 +97,11 @@ export class Logger {
   }
 
   getLogsByLevel(level: LogLevel, count = 100): LogEntry[] {
-    return this.logs.filter(log => log.level === level).slice(-count);
+    return this.logs.filter((log) => log.level === level).slice(-count);
   }
 
   getLogsByContext(context: string, count = 100): LogEntry[] {
-    return this.logs.filter(log => log.context === context).slice(-count);
+    return this.logs.filter((log) => log.context === context).slice(-count);
   }
 
   clear(): void {
@@ -108,7 +113,4 @@ export class Logger {
   }
 }
 
-export const logger = new Logger(
-  process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO
-);
-
+export const logger = new Logger(LogLevel.DEBUG);
