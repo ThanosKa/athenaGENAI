@@ -8,6 +8,7 @@ import {
   ExtractionStatistics,
 } from "@/types/data";
 import { StatisticsCards } from "@/components/StatisticsCards";
+import { StatisticsCharts } from "@/components/StatisticsCharts";
 import { ExtractionList } from "@/components/ExtractionList";
 import { ExtractionReview } from "@/components/ExtractionReview";
 import { Button } from "@/components/ui/button";
@@ -265,6 +266,8 @@ export default function DashboardPage() {
         ) : (
           <StatisticsCards statistics={statistics} />
         )}
+
+        {!initialLoading && <StatisticsCharts statistics={statistics} />}
 
         <Card className="shadow-sm">
           <CardHeader>
