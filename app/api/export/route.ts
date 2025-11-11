@@ -3,10 +3,6 @@ import { exportService } from '@/lib/services/export-service';
 import { logger } from '@/lib/utils/logger';
 import { errorHandler, ErrorCategory } from '@/lib/utils/error-handler';
 
-/**
- * POST /api/export
- * Export approved records to Google Sheets
- */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -20,14 +16,12 @@ export async function POST(request: NextRequest) {
 
     let result;
     if (ids && Array.isArray(ids)) {
-      // Export specific records
       result = await exportService.exportRecordsByIds({
         ids,
         spreadsheetId,
         createNew,
       });
     } else {
-      // Export all approved records
       result = await exportService.exportApprovedRecords({
         spreadsheetId,
         createNew,
@@ -76,21 +70,34 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/**
- * GET /api/export
- * Get export status/information
- */
 export async function GET() {
   try {
-    // This could be extended to track export history
+    const hasEnvVar = !!process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+    
+    // Console log for environment variable check
+    console.log('[Export API] GET /api/export - Checking environment variable...');
+    console.log('[Export API] GOOGLE_SERVICE_ACCOUNT_KEY exists:', hasEnvVar);
+    
+    if (hasEnvVar) {
+      try {
+        const parsed = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+        console.log('[Export API] Credentials JSON is valid. Project ID:', parsed.project_id || 'N/A');
+      } catch (parseError) {
+        console.error('[Export API] WARNING: GOOGLE_SERVICE_ACCOUNT_KEY exists but is not valid JSON');
+      }
+    } else {
+      console.log('[Export API] WARNING: GOOGLE_SERVICE_ACCOUNT_KEY is not set');
+    }
+    
     return NextResponse.json({
       success: true,
       data: {
         message: 'Export API is ready',
-        googleSheetsConfigured: !!process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
+        googleSheetsConfigured: hasEnvVar,
       },
     });
   } catch (error) {
+    console.error('[Export API] ERROR: Failed to check export status:', error instanceof Error ? error.message : String(error));
     logger.error('Export status check failed', error, 'API:Export');
     return NextResponse.json(
       {

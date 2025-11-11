@@ -1,6 +1,3 @@
-/**
- * Log levels
- */
 export enum LogLevel {
   DEBUG = 'debug',
   INFO = 'info',
@@ -8,9 +5,6 @@ export enum LogLevel {
   ERROR = 'error',
 }
 
-/**
- * Log entry structure
- */
 interface LogEntry {
   level: LogLevel;
   message: string;
@@ -19,9 +13,6 @@ interface LogEntry {
   timestamp: Date;
 }
 
-/**
- * Simple logger with context support
- */
 export class Logger {
   private minLevel: LogLevel;
   private logs: LogEntry[] = [];
@@ -31,44 +22,28 @@ export class Logger {
     this.minLevel = minLevel;
   }
 
-  /**
-   * Debug log
-   */
   debug(message: string, data?: unknown, context?: string): void {
     this.log(LogLevel.DEBUG, message, data, context);
   }
 
-  /**
-   * Info log
-   */
   info(message: string, data?: unknown, context?: string): void {
     this.log(LogLevel.INFO, message, data, context);
   }
 
-  /**
-   * Warning log
-   */
   warn(message: string, data?: unknown, context?: string): void {
     this.log(LogLevel.WARN, message, data, context);
   }
 
-  /**
-   * Error log
-   */
   error(message: string, data?: unknown, context?: string): void {
     this.log(LogLevel.ERROR, message, data, context);
   }
 
-  /**
-   * Core logging method
-   */
   private log(
     level: LogLevel,
     message: string,
     data?: unknown,
     context?: string
   ): void {
-    // Check if this level should be logged
     if (!this.shouldLog(level)) {
       return;
     }
@@ -81,13 +56,11 @@ export class Logger {
       timestamp: new Date(),
     };
 
-    // Store in memory
     this.logs.push(entry);
     if (this.logs.length > this.maxLogs) {
-      this.logs.shift(); // Remove oldest log
+      this.logs.shift();
     }
 
-    // Console output
     const prefix = context ? `[${context}]` : '';
     const timestamp = entry.timestamp.toISOString();
 
@@ -107,9 +80,6 @@ export class Logger {
     }
   }
 
-  /**
-   * Check if level should be logged
-   */
   private shouldLog(level: LogLevel): boolean {
     const levels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR];
     const currentIndex = levels.indexOf(level);
@@ -117,44 +87,27 @@ export class Logger {
     return currentIndex >= minIndex;
   }
 
-  /**
-   * Get recent logs
-   */
   getRecentLogs(count = 100): LogEntry[] {
     return this.logs.slice(-count);
   }
 
-  /**
-   * Get logs by level
-   */
   getLogsByLevel(level: LogLevel, count = 100): LogEntry[] {
     return this.logs.filter(log => log.level === level).slice(-count);
   }
 
-  /**
-   * Get logs by context
-   */
   getLogsByContext(context: string, count = 100): LogEntry[] {
     return this.logs.filter(log => log.context === context).slice(-count);
   }
 
-  /**
-   * Clear all logs
-   */
   clear(): void {
     this.logs = [];
   }
 
-  /**
-   * Set minimum log level
-   */
   setMinLevel(level: LogLevel): void {
     this.minLevel = level;
   }
 }
 
-// Singleton instance
-// In production, set to INFO or WARN
 export const logger = new Logger(
   process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO
 );

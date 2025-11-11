@@ -8,13 +8,7 @@ import { storageService } from '@/lib/services/storage';
 
 type EditableData = ExtractedFormData | ExtractedEmailData | ExtractedInvoiceData;
 
-/**
- * Service for editing extracted data before approval
- */
 export class EditService {
-  /**
-   * Edit an extraction record
-   */
   edit({
     id,
     updatedData,
@@ -29,7 +23,6 @@ export class EditService {
       return { success: false, error: 'Record not found' };
     }
 
-    // Can only edit pending, edited, or approved records (before export)
     if (
       record.status !== ExtractionStatus.PENDING &&
       record.status !== ExtractionStatus.EDITED &&
@@ -41,16 +34,13 @@ export class EditService {
       };
     }
 
-    // Validate the updated data based on record type
     const validationError = validateData(updatedData, record.data);
     if (validationError) {
       return { success: false, error: validationError };
     }
 
-    // Merge the updated data with existing data
     const mergedData = { ...record.data, ...updatedData };
 
-    // Update the record
     const updated = storageService.updateRecord(id, {
       data: mergedData,
       status: ExtractionStatus.EDITED,
@@ -65,9 +55,6 @@ export class EditService {
     return { success: true };
   }
 
-  /**
-   * Validate field value
-   */
   validateField({
     fieldName,
     value,
@@ -113,9 +100,6 @@ export class EditService {
   }
 }
 
-/**
- * Validate updated data structure
- */
 function validateData(
   updatedData: Partial<EditableData>,
   originalData: EditableData
@@ -158,6 +142,5 @@ function validateData(
   return undefined;
 }
 
-// Singleton instance
 export const editService = new EditService();
 

@@ -12,15 +12,9 @@ import { googleSheetsClient } from '@/lib/integrations/google-sheets';
 import { logger } from '@/lib/utils/logger';
 import { errorHandler, ErrorCategory } from '@/lib/utils/error-handler';
 
-/**
- * Export service handles data export to Google Sheets
- */
 export class ExportService {
   private isInitialized = false;
 
-  /**
-   * Initialize the export service
-   */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
@@ -40,18 +34,14 @@ export class ExportService {
     }
   }
 
-  /**
-   * Export all approved records to Google Sheets
-   */
   async exportApprovedRecords({
     spreadsheetId,
     createNew,
   }: {
     spreadsheetId?: string;
     createNew?: boolean;
-  } = {}): Promise<{ success: boolean; spreadsheetId?: string; error?: string }> {
+  }   = {}): Promise<{ success: boolean; spreadsheetId?: string; error?: string }> {
     try {
-      // Get all approved records first - check before initializing Google Sheets
       const approvedRecords = storageService.getRecords({
         status: ExtractionStatus.APPROVED,
       });
@@ -63,12 +53,10 @@ export class ExportService {
         };
       }
 
-      // Initialize if needed
       if (!this.isInitialized) {
         await this.initialize();
       }
 
-      // Create new spreadsheet or use existing
       let targetSpreadsheetId = spreadsheetId;
       if (createNew || !targetSpreadsheetId) {
         targetSpreadsheetId = await googleSheetsClient.createSpreadsheet({
@@ -78,7 +66,6 @@ export class ExportService {
         googleSheetsClient.setSpreadsheetId(targetSpreadsheetId);
       }
 
-      // Separate records by type
       const forms: ExtractedFormData[] = [];
       const emails: ExtractedEmailData[] = [];
       const invoices: ExtractedInvoiceData[] = [];
@@ -97,7 +84,6 @@ export class ExportService {
         }
       }
 
-      // Export to Google Sheets
       if (forms.length > 0) {
         await googleSheetsClient.exportForms(forms);
         logger.info(`Exported ${forms.length} forms`, undefined, 'ExportService');
@@ -113,7 +99,6 @@ export class ExportService {
         logger.info(`Exported ${invoices.length} invoices`, undefined, 'ExportService');
       }
 
-      // Mark all records as exported
       for (const record of approvedRecords) {
         approvalService.markAsExported({ id: record.id });
       }
@@ -142,9 +127,6 @@ export class ExportService {
     }
   }
 
-  /**
-   * Export specific records by IDs
-   */
   async exportRecordsByIds({
     ids,
     spreadsheetId,
@@ -155,12 +137,10 @@ export class ExportService {
     createNew?: boolean;
   }): Promise<{ success: boolean; spreadsheetId?: string; error?: string }> {
     try {
-      // Initialize if needed
       if (!this.isInitialized) {
         await this.initialize();
       }
 
-      // Get records
       const records = ids
         .map(id => storageService.getRecord(id))
         .filter((r): r is ExtractionRecord => r !== undefined);
@@ -172,7 +152,6 @@ export class ExportService {
         };
       }
 
-      // Create new spreadsheet or use existing
       let targetSpreadsheetId = spreadsheetId;
       if (createNew || !targetSpreadsheetId) {
         targetSpreadsheetId = await googleSheetsClient.createSpreadsheet({
@@ -182,13 +161,11 @@ export class ExportService {
         googleSheetsClient.setSpreadsheetId(targetSpreadsheetId);
       }
 
-      // Separate records by type
       const forms: ExtractedFormData[] = [];
       const emails: ExtractedEmailData[] = [];
       const invoices: ExtractedInvoiceData[] = [];
 
       for (const record of records) {
-        // Only export approved or edited records
         if (
           record.status !== ExtractionStatus.APPROVED &&
           record.status !== ExtractionStatus.EDITED
@@ -220,7 +197,6 @@ export class ExportService {
         await googleSheetsClient.exportInvoices(invoices);
       }
 
-      // Mark as exported
       for (const record of records) {
         if (
           record.status === ExtractionStatus.APPROVED ||
@@ -256,6 +232,5 @@ export class ExportService {
   }
 }
 
-// Singleton instance
 export const exportService = new ExportService();
 

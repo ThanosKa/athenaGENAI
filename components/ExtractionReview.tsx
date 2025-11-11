@@ -46,7 +46,6 @@ export function ExtractionReview({
   const [isEditing, setIsEditing] = useState(initialEditMode);
   const [editedData, setEditedData] = useState(record.data);
 
-  // Reset editing state when record changes
   useEffect(() => {
     setIsEditing(initialEditMode);
     setEditedData(record.data);
@@ -75,7 +74,6 @@ export function ExtractionReview({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Warnings */}
           {record.warnings.length > 0 && (
             <Alert variant="warning" data-testid="warnings-alert">
               <AlertTitle>Warnings</AlertTitle>
@@ -89,7 +87,6 @@ export function ExtractionReview({
             </Alert>
           )}
 
-          {/* Error */}
           {record.error && (
             <Alert variant="destructive" data-testid="error-alert">
               <AlertTitle>Error</AlertTitle>
@@ -97,7 +94,6 @@ export function ExtractionReview({
             </Alert>
           )}
 
-          {/* Data fields based on source type */}
           {record.sourceType === SourceType.FORM && (
             <FormDataFields
               data={editedData as ExtractedFormData}
@@ -125,7 +121,6 @@ export function ExtractionReview({
 
         <DialogFooter className="flex justify-between sm:justify-between">
           {isEditing ? (
-            // Edit mode: Show Save Changes and Cancel buttons only
             <div className="flex gap-2">
               <Button onClick={handleSave} data-testid="save-edit-btn">
                 Save Changes
@@ -142,7 +137,6 @@ export function ExtractionReview({
               </Button>
             </div>
           ) : (
-            // View mode: Show Approve/Reject/Edit buttons
             <div className="flex gap-2">
               <Button
                 variant="default"

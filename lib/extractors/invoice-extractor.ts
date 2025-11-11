@@ -17,37 +17,30 @@ export function extractInvoiceData({
   try {
     const $ = cheerio.load(htmlContent);
 
-    // Extract invoice number
     const invoiceNumber = extractInvoiceNumber($);
     if (!invoiceNumber) {
       warnings.push('Invoice number not found');
     }
 
-    // Extract date
     const date = extractInvoiceDate($);
     if (!date) {
       warnings.push('Invoice date not found');
     }
 
-    // Extract customer information
     const customerInfo = extractCustomerInfo($);
     if (!customerInfo.customerName) {
       warnings.push('Customer name not found');
     }
 
-    // Extract payment method
     const paymentMethod = extractPaymentMethod($);
 
-    // Extract line items
     const items = extractLineItems($);
     if (items.length === 0) {
       warnings.push('No line items found in invoice');
     }
 
-    // Extract financial totals
     const financials = extractFinancialTotals($);
     
-    // Validate VAT calculation
     if (financials.netAmount && financials.vatAmount) {
       const expectedVat = financials.netAmount * (financials.vatRate / 100);
       const vatDifference = Math.abs(expectedVat - financials.vatAmount);
@@ -56,7 +49,6 @@ export function extractInvoiceData({
       }
     }
 
-    // Validate total calculation
     if (financials.netAmount && financials.vatAmount && financials.totalAmount) {
       const expectedTotal = financials.netAmount + financials.vatAmount;
       const totalDifference = Math.abs(expectedTotal - financials.totalAmount);
@@ -65,7 +57,6 @@ export function extractInvoiceData({
       }
     }
 
-    // Extract notes
     const notes = extractNotes($);
 
     const data: ExtractedInvoiceData = {
@@ -100,17 +91,14 @@ export function extractInvoiceData({
  * Extract invoice number from document
  */
 function extractInvoiceNumber($: cheerio.CheerioAPI): string | undefined {
-  // Look for patterns like "Αριθμός: TF-2024-001" or "TF-2024-001"
   const invoiceNumberPattern = /TF-\d{4}-\d{3}/;
   
-  // Try to find in invoice-details section
   const invoiceDetailsText = $('.invoice-details').text();
   const match = invoiceDetailsText.match(invoiceNumberPattern);
   if (match) {
     return match[0];
   }
 
-  // Fallback: search entire document
   const bodyText = $('body').text();
   const bodyMatch = bodyText.match(invoiceNumberPattern);
   if (bodyMatch) {
@@ -124,10 +112,8 @@ function extractInvoiceNumber($: cheerio.CheerioAPI): string | undefined {
  * Extract invoice date
  */
 function extractInvoiceDate($: cheerio.CheerioAPI): string | undefined {
-  // Look for date pattern like "21/01/2024"
   const datePattern = /\d{1,2}\/\d{1,2}\/\d{4}/;
   
-  // Search in invoice-details section
   const invoiceDetailsText = $('.invoice-details').text();
   const match = invoiceDetailsText.match(datePattern);
   if (match) {
@@ -151,7 +137,6 @@ function extractCustomerInfo($: cheerio.CheerioAPI): {
     customerTaxId?: string;
   } = {};
 
-  // Find the customer section in invoice-details
   const invoiceDetails = $('.invoice-details').html() || '';
   const customerSection = invoiceDetails.split('Πελάτης:')[1];
   
@@ -162,10 +147,8 @@ function extractCustomerInfo($: cheerio.CheerioAPI): {
       .filter(line => line.length > 0);
 
     if (lines.length > 0) {
-      // First line after "Πελάτης:" is the customer name
       result.customerName = lines[0].replace('Πελάτης:', '').trim();
       
-      // Subsequent lines may contain address
       const addressLines: string[] = [];
       for (let i = 1; i < lines.length; i++) {
         if (lines[i].startsWith('ΑΦΜ:')) {
@@ -237,7 +220,7 @@ function extractFinancialTotals($: cheerio.CheerioAPI): {
   totalAmount?: number;
 } {
   const result = {
-    vatRate: 24, // Default Greek VAT rate
+    vatRate: 24,
   } as {
     netAmount?: number;
     vatRate: number;
@@ -245,23 +228,19 @@ function extractFinancialTotals($: cheerio.CheerioAPI): {
     totalAmount?: number;
   };
 
-  // Find the summary section
   const summaryText = $('.summary').text();
 
-  // Extract net amount (Καθαρή Αξία)
   const netMatch = summaryText.match(/Καθαρή Αξία:?\s*€?([\d,\.]+)/);
   if (netMatch) {
     result.netAmount = parseCurrency(netMatch[1]);
   }
 
-  // Extract VAT amount and rate
   const vatMatch = summaryText.match(/ΦΠΑ\s+(\d+)%:?\s*€?([\d,\.]+)/);
   if (vatMatch) {
     result.vatRate = parseFloat(vatMatch[1]);
     result.vatAmount = parseCurrency(vatMatch[2]);
   }
 
-  // Extract total amount
   const totalMatch = summaryText.match(/ΣΥΝΟΛΟ:?\s*€?([\d,\.]+)/);
   if (totalMatch) {
     result.totalAmount = parseCurrency(totalMatch[1]);
@@ -276,7 +255,6 @@ function extractFinancialTotals($: cheerio.CheerioAPI): {
 function extractNotes($: cheerio.CheerioAPI): string | undefined {
   const notes: string[] = [];
 
-  // Look for notes section
   $('p').each((_, elem) => {
     const text = $(elem).text().trim();
     if (text.startsWith('Σημειώσεις:') || text.startsWith('Εγγύηση:')) {
@@ -292,15 +270,11 @@ function extractNotes($: cheerio.CheerioAPI): string | undefined {
  * Handles formats like "€1,054.00", "1.054,00", "1054.00"
  */
 function parseCurrency(value: string): number {
-  // Remove currency symbols and whitespace
   let cleaned = value.replace(/[€$\s]/g, '');
   
-  // Handle different decimal separators
-  // If there's a comma followed by exactly 2 digits at the end, it's likely a decimal separator
   if (/,\d{2}$/.test(cleaned)) {
     cleaned = cleaned.replace(/\./g, '').replace(',', '.');
   } else {
-    // Otherwise, remove commas (they're thousand separators)
     cleaned = cleaned.replace(/,/g, '');
   }
 

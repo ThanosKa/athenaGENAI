@@ -8,22 +8,19 @@ import { logger } from '@/lib/utils/logger';
 
 const sheets = google.sheets('v4');
 
-/**
- * Google Sheets client for exporting data
- * Requires GOOGLE_SERVICE_ACCOUNT_KEY environment variable
- */
 export class GoogleSheetsClient {
   private auth: unknown;
   private spreadsheetId?: string;
 
-  /**
-   * Initialize authentication
-   */
   async initialize(): Promise<void> {
     try {
-      // Check for credentials
       const credentials = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+      
+      console.log('[Google Sheets] Checking environment variable...');
+      console.log('[Google Sheets] GOOGLE_SERVICE_ACCOUNT_KEY exists:', !!credentials);
+      
       if (!credentials) {
+        console.log('[Google Sheets] WARNING: GOOGLE_SERVICE_ACCOUNT_KEY is not set');
         logger.warn(
           'Google Sheets credentials not configured',
           undefined,
@@ -32,10 +29,10 @@ export class GoogleSheetsClient {
         return;
       }
 
-      // Parse credentials
+      console.log('[Google Sheets] Attempting to parse credentials JSON...');
       const credentialsJson = JSON.parse(credentials);
+      console.log('[Google Sheets] Credentials parsed successfully. Client email:', credentialsJson.client_email || 'N/A');
 
-      // Create JWT auth client
       const auth = new google.auth.JWT({
         email: credentialsJson.client_email,
         key: credentialsJson.private_key,
@@ -43,16 +40,18 @@ export class GoogleSheetsClient {
       });
 
       this.auth = auth;
+      console.log('[Google Sheets] Authentication initialized successfully');
       logger.info('Google Sheets authentication initialized', undefined, 'GoogleSheets');
     } catch (error) {
+      console.error('[Google Sheets] ERROR: Failed to initialize authentication:', error instanceof Error ? error.message : String(error));
+      if (error instanceof SyntaxError) {
+        console.error('[Google Sheets] ERROR: Invalid JSON format in GOOGLE_SERVICE_ACCOUNT_KEY');
+      }
       logger.error('Failed to initialize Google Sheets auth', error, 'GoogleSheets');
       throw error;
     }
   }
 
-  /**
-   * Create a new spreadsheet
-   */
   async createSpreadsheet({
     title,
   }: {
@@ -90,16 +89,10 @@ export class GoogleSheetsClient {
     }
   }
 
-  /**
-   * Set the spreadsheet ID to use
-   */
   setSpreadsheetId(id: string): void {
     this.spreadsheetId = id;
   }
 
-  /**
-   * Export form data to spreadsheet
-   */
   async exportForms(data: ExtractedFormData[]): Promise<void> {
     if (!this.spreadsheetId || !this.auth) {
       throw new Error('Google Sheets client not initialized');
@@ -134,9 +127,6 @@ export class GoogleSheetsClient {
     });
   }
 
-  /**
-   * Export email data to spreadsheet
-   */
   async exportEmails(data: ExtractedEmailData[]): Promise<void> {
     if (!this.spreadsheetId || !this.auth) {
       throw new Error('Google Sheets client not initialized');
@@ -175,9 +165,6 @@ export class GoogleSheetsClient {
     });
   }
 
-  /**
-   * Export invoice data to spreadsheet
-   */
   async exportInvoices(data: ExtractedInvoiceData[]): Promise<void> {
     if (!this.spreadsheetId || !this.auth) {
       throw new Error('Google Sheets client not initialized');
@@ -218,9 +205,6 @@ export class GoogleSheetsClient {
     });
   }
 
-  /**
-   * Write data to a specific sheet
-   */
   private async writeToSheet({
     sheetName,
     headers,
@@ -235,14 +219,12 @@ export class GoogleSheetsClient {
     }
 
     try {
-      // Clear existing data
       await sheets.spreadsheets.values.clear({
         auth: this.auth as never,
         spreadsheetId: this.spreadsheetId,
         range: `${sheetName}!A:Z`,
       });
 
-      // Write headers and data
       const values = [headers, ...rows];
       await sheets.spreadsheets.values.update({
         auth: this.auth as never,
@@ -266,6 +248,5 @@ export class GoogleSheetsClient {
   }
 }
 
-// Singleton instance
 export const googleSheetsClient = new GoogleSheetsClient();
 

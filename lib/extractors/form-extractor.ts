@@ -17,7 +17,6 @@ export function extractFormData({
   try {
     const $ = cheerio.load(htmlContent);
 
-    // Extract data from form inputs by name attribute
     const fullName = $('input[name="full_name"]').val()?.toString() || '';
     const email = $('input[name="email"]').val()?.toString() || '';
     const phone = $('input[name="phone"]').val()?.toString() || '';
@@ -25,15 +24,12 @@ export function extractFormData({
     const message = $('textarea[name="message"]').val()?.toString() || '';
     const submissionDate = $('input[name="submission_date"]').val()?.toString() || '';
     
-    // Extract service from select element
     const service = $('select[name="service"] option[selected]').text().trim() ||
                     $('select[name="service"]').val()?.toString() || '';
     
-    // Extract priority from select element
     const priority = $('select[name="priority"] option[selected]').text().trim() ||
                      $('select[name="priority"]').val()?.toString() || '';
 
-    // Validate required fields
     if (!fullName) {
       warnings.push('Full name is missing or empty');
     }
@@ -52,7 +48,6 @@ export function extractFormData({
       warnings.push('Service interest is missing or empty');
     }
 
-    // Check for empty values that should have content
     if (fullName && fullName.trim().length < 2) {
       warnings.push('Full name appears too short');
     }

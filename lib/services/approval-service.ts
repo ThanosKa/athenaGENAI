@@ -1,13 +1,7 @@
 import { ExtractionStatus } from '@/types/data';
 import { storageService } from '@/lib/services/storage';
 
-/**
- * Service for handling approval/rejection of extracted data
- */
 export class ApprovalService {
-  /**
-   * Approve an extraction
-   */
   approve({
     id,
     approvedBy,
@@ -20,7 +14,6 @@ export class ApprovalService {
       return false;
     }
 
-    // Can only approve pending or edited records
     if (
       record.status !== ExtractionStatus.PENDING &&
       record.status !== ExtractionStatus.EDITED
@@ -36,9 +29,6 @@ export class ApprovalService {
     });
   }
 
-  /**
-   * Reject an extraction
-   */
   reject({
     id,
     rejectedBy,
@@ -53,7 +43,6 @@ export class ApprovalService {
       return false;
     }
 
-    // Can only reject pending or edited records
     if (
       record.status !== ExtractionStatus.PENDING &&
       record.status !== ExtractionStatus.EDITED
@@ -70,9 +59,6 @@ export class ApprovalService {
     });
   }
 
-  /**
-   * Bulk approve multiple extractions
-   */
   bulkApprove({
     ids,
     approvedBy,
@@ -95,9 +81,6 @@ export class ApprovalService {
     return { succeeded, failed };
   }
 
-  /**
-   * Bulk reject multiple extractions
-   */
   bulkReject({
     ids,
     rejectedBy,
@@ -122,9 +105,6 @@ export class ApprovalService {
     return { succeeded, failed };
   }
 
-  /**
-   * Mark extraction as exported
-   */
   markAsExported({
     id,
   }: {
@@ -135,7 +115,6 @@ export class ApprovalService {
       return false;
     }
 
-    // Can only mark approved records as exported
     if (record.status !== ExtractionStatus.APPROVED) {
       return false;
     }
@@ -147,6 +126,5 @@ export class ApprovalService {
   }
 }
 
-// Singleton instance
 export const approvalService = new ApprovalService();
 

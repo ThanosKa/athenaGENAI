@@ -84,7 +84,6 @@ export function ExtractionList({
                 {record.sourceFile}
               </TableCell>
               <TableCell>
-                {/* FIXED: Explicitly pass data-testid */}
                 <StatusBadge
                   status={record.status}
                   data-testid={`status-badge-${record.id}`}
@@ -201,7 +200,6 @@ function SourceTypeBadge({ type }: { type: SourceType }) {
   );
 }
 
-// FIXED: Explicitly handle data-testid prop
 function StatusBadge({
   status,
   "data-testid": dataTestId,

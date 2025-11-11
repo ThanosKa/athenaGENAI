@@ -54,7 +54,6 @@ export default function DashboardPage() {
   const [filterSource, setFilterSource] = useState<SourceType | "all">("all");
   const [search, setSearch] = useState("");
 
-  // Load extractions
   const loadExtractions = async () => {
     try {
       const params = new URLSearchParams();
@@ -85,7 +84,6 @@ export default function DashboardPage() {
     loadExtractions();
   }, [filterStatus, filterSource, search]);
 
-  // Process all data
   const handleProcessData = async () => {
     setLoading(true);
 
@@ -109,7 +107,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Approve extraction
   const handleApprove = async (id: string) => {
     try {
       const response = await fetch("/api/approvals", {
@@ -132,7 +129,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Reject extraction
   const handleReject = async (id: string) => {
     try {
       const response = await fetch("/api/approvals", {
@@ -155,7 +151,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Save edited data
   const handleSaveEdit = async (id: string, updatedData: unknown) => {
     try {
       const response = await fetch("/api/approvals", {
@@ -177,7 +172,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Export to Google Sheets
   const handleExport = async () => {
     setLoading(true);
 
@@ -205,7 +199,6 @@ export default function DashboardPage() {
     }
   };
 
-  // View record (read-only)
   const handleView = (id: string) => {
     const record = records.find((r) => r.id === id);
     if (record) {
@@ -214,7 +207,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Edit record (opens in edit mode)
   const handleEdit = (id: string) => {
     const record = records.find((r) => r.id === id);
     if (record) {
@@ -226,7 +218,6 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6 sm:space-y-8">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
           <div className="space-y-1">
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
@@ -257,7 +248,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Statistics */}
         {initialLoading ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
@@ -276,7 +266,6 @@ export default function DashboardPage() {
           <StatisticsCards statistics={statistics} />
         )}
 
-        {/* Filters */}
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg">Filters</CardTitle>
@@ -356,7 +345,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Selected Record Review */}
         {selectedRecord && (
           <ExtractionReview
             record={selectedRecord}
@@ -373,7 +361,6 @@ export default function DashboardPage() {
           />
         )}
 
-        {/* Extraction List */}
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg">Extractions</CardTitle>

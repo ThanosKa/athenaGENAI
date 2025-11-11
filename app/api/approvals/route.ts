@@ -4,10 +4,6 @@ import { editService } from '@/lib/services/edit-service';
 import { logger } from '@/lib/utils/logger';
 import { errorHandler, ErrorCategory } from '@/lib/utils/error-handler';
 
-/**
- * POST /api/approvals
- * Approve, reject, or edit extractions
- */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

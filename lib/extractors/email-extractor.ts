@@ -16,7 +16,6 @@ export async function extractEmailData({
   const warnings: string[] = [];
 
   try {
-    // Parse the email
     const parsed = await simpleParser(emlContent);
 
     const from = parsed.from?.text || '';
@@ -28,7 +27,6 @@ export async function extractEmailData({
     const date = parsed.date?.toISOString() || new Date().toISOString();
     const bodyText = parsed.text || '';
 
-    // Determine email type and extract data
     const isInvoiceNotification = detectInvoiceNotification(subject, bodyText);
     
     let extractedData: ExtractedEmailData = {
@@ -42,7 +40,6 @@ export async function extractEmailData({
     };
 
     if (isInvoiceNotification) {
-      // Extract invoice reference
       const invoiceRef = extractInvoiceReference(subject, bodyText);
       if (invoiceRef) {
         extractedData.invoiceReference = invoiceRef;
@@ -50,11 +47,9 @@ export async function extractEmailData({
         warnings.push('Invoice notification detected but no invoice reference found');
       }
     } else {
-      // Extract contact information from email body
       const contactInfo = extractContactInfo(bodyText, from);
       extractedData = { ...extractedData, ...contactInfo };
 
-      // Validate extracted contact info
       if (!contactInfo.fullName) {
         warnings.push('Could not extract full name from email body');
       }

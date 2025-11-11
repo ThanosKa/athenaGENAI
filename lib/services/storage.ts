@@ -5,30 +5,17 @@ import {
   SourceType,
 } from '@/types/data';
 
-/**
- * In-memory storage for extraction records
- * In production, this would be replaced with a database
- */
 class StorageService {
   private records: Map<string, ExtractionRecord> = new Map();
 
-  /**
-   * Add a new extraction record
-   */
   addRecord(record: ExtractionRecord): void {
     this.records.set(record.id, record);
   }
 
-  /**
-   * Get a single record by ID
-   */
   getRecord(id: string): ExtractionRecord | undefined {
     return this.records.get(id);
   }
 
-  /**
-   * Get all records, optionally filtered
-   */
   getRecords({
     status,
     sourceType,
@@ -37,20 +24,17 @@ class StorageService {
     status?: ExtractionStatus;
     sourceType?: SourceType;
     search?: string;
-  } = {}): ExtractionRecord[] {
+  }   = {}): ExtractionRecord[] {
     let records = Array.from(this.records.values());
 
-    // Filter by status
     if (status) {
       records = records.filter(r => r.status === status);
     }
 
-    // Filter by source type
     if (sourceType) {
       records = records.filter(r => r.sourceType === sourceType);
     }
 
-    // Filter by search query
     if (search) {
       const searchLower = search.toLowerCase();
       records = records.filter(r => {
@@ -60,15 +44,11 @@ class StorageService {
       });
     }
 
-    // Sort by extraction date (newest first)
     records.sort((a, b) => b.extractedAt.getTime() - a.extractedAt.getTime());
 
     return records;
   }
 
-  /**
-   * Update a record
-   */
   updateRecord(id: string, updates: Partial<ExtractionRecord>): boolean {
     const record = this.records.get(id);
     if (!record) {
@@ -80,16 +60,10 @@ class StorageService {
     return true;
   }
 
-  /**
-   * Delete a record
-   */
   deleteRecord(id: string): boolean {
     return this.records.delete(id);
   }
 
-  /**
-   * Get statistics for dashboard
-   */
   getStatistics(): ExtractionStatistics {
     const records = Array.from(this.records.values());
 
@@ -108,7 +82,6 @@ class StorageService {
     };
 
     for (const record of records) {
-      // Count by status
       switch (record.status) {
         case ExtractionStatus.PENDING:
           stats.pending++;
@@ -127,7 +100,6 @@ class StorageService {
           break;
       }
 
-      // Count by source type
       switch (record.sourceType) {
         case SourceType.FORM:
           stats.bySource.forms++;
@@ -144,14 +116,10 @@ class StorageService {
     return stats;
   }
 
-  /**
-   * Clear all records (for testing)
-   */
   clear(): void {
     this.records.clear();
   }
 }
 
-// Singleton instance
 export const storageService = new StorageService();
 

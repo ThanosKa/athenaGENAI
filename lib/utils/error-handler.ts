@@ -1,6 +1,3 @@
-/**
- * Error categories for classification
- */
 export enum ErrorCategory {
   EXTRACTION = 'extraction',
   VALIDATION = 'validation',
@@ -10,9 +7,6 @@ export enum ErrorCategory {
   UNKNOWN = 'unknown',
 }
 
-/**
- * Structured error object
- */
 export interface AppError {
   category: ErrorCategory;
   message: string;
@@ -21,13 +15,7 @@ export interface AppError {
   timestamp: Date;
 }
 
-/**
- * Centralized error handler
- */
 export class ErrorHandler {
-  /**
-   * Handle an error and return user-friendly message
-   */
   handle({
     error,
     category,
@@ -67,7 +55,6 @@ export class ErrorHandler {
       timestamp,
     };
 
-    // Log the error
     console.error('[ErrorHandler]', {
       category,
       context,
@@ -79,9 +66,6 @@ export class ErrorHandler {
     return appError;
   }
 
-  /**
-   * Generate user-friendly error message
-   */
   private getUserFriendlyMessage({
     category,
     message,
@@ -141,11 +125,7 @@ export class ErrorHandler {
     }
   }
 
-  /**
-   * Check if error is recoverable
-   */
   isRecoverable(error: AppError): boolean {
-    // Network and temporary errors are usually recoverable
     return (
       error.category === ErrorCategory.NETWORK ||
       error.message.includes('timeout') ||
@@ -154,6 +134,5 @@ export class ErrorHandler {
   }
 }
 
-// Singleton instance
 export const errorHandler = new ErrorHandler();
 

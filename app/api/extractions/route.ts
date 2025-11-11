@@ -1,20 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { dataProcessor } from '@/lib/services/data-processor';
-import { storageService } from '@/lib/services/storage';
-import { ExtractionStatus, SourceType } from '@/types/data';
-import { logger } from '@/lib/utils/logger';
-import { errorHandler, ErrorCategory } from '@/lib/utils/error-handler';
+import { NextRequest, NextResponse } from "next/server";
+import { dataProcessor } from "@/lib/services/data-processor";
+import { storageService } from "@/lib/services/storage";
+import { ExtractionStatus, SourceType } from "@/types/data";
+import { logger } from "@/lib/utils/logger";
+import { errorHandler, ErrorCategory } from "@/lib/utils/error-handler";
 
-/**
- * GET /api/extractions
- * List all extractions with optional filtering
- */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
-    const status = searchParams.get('status') as ExtractionStatus | null;
-    const sourceType = searchParams.get('sourceType') as SourceType | null;
-    const search = searchParams.get('search');
+    const status = searchParams.get("status") as ExtractionStatus | null;
+    const sourceType = searchParams.get("sourceType") as SourceType | null;
+    const search = searchParams.get("search");
 
     const records = storageService.getRecords({
       status: status || undefined,
@@ -27,7 +23,7 @@ export async function GET(request: NextRequest) {
     logger.info(
       `Retrieved ${records.length} extraction records`,
       { status, sourceType, search },
-      'API:Extractions'
+      "API:Extractions"
     );
 
     return NextResponse.json({
@@ -38,11 +34,11 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error('Failed to retrieve extractions', error, 'API:Extractions');
+    logger.error("Failed to retrieve extractions", error, "API:Extractions");
     const appError = errorHandler.handle({
       error,
       category: ErrorCategory.STORAGE,
-      context: 'GET /api/extractions',
+      context: "GET /api/extractions",
     });
 
     return NextResponse.json(
@@ -55,13 +51,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/**
- * POST /api/extractions
- * Process all dummy data files
- */
 export async function POST() {
   try {
-    logger.info('Starting data extraction process', undefined, 'API:Extractions');
+    logger.info(
+      "Starting data extraction process",
+      undefined,
+      "API:Extractions"
+    );
 
     const result = await dataProcessor.processAllDummyData();
 
@@ -75,7 +71,7 @@ export async function POST() {
         emails: result.emails.length,
         invoices: result.invoices.length,
       },
-      'API:Extractions'
+      "API:Extractions"
     );
 
     return NextResponse.json({
@@ -96,11 +92,11 @@ export async function POST() {
       },
     });
   } catch (error) {
-    logger.error('Data extraction failed', error, 'API:Extractions');
+    logger.error("Data extraction failed", error, "API:Extractions");
     const appError = errorHandler.handle({
       error,
       category: ErrorCategory.EXTRACTION,
-      context: 'POST /api/extractions',
+      context: "POST /api/extractions",
     });
 
     return NextResponse.json(
@@ -112,4 +108,3 @@ export async function POST() {
     );
   }
 }
-

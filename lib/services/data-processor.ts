@@ -13,13 +13,7 @@ import {
 } from '@/types/data';
 import { storageService } from '@/lib/services/storage';
 
-/**
- * Data processor orchestrates extraction from all sources
- */
 export class DataProcessor {
-  /**
-   * Process a single form file
-   */
   async processForm({
     filePath,
     fileName,
@@ -45,9 +39,6 @@ export class DataProcessor {
     return record;
   }
 
-  /**
-   * Process a single email file
-   */
   async processEmail({
     filePath,
     fileName,
@@ -73,9 +64,6 @@ export class DataProcessor {
     return record;
   }
 
-  /**
-   * Process a single invoice file
-   */
   async processInvoice({
     filePath,
     fileName,
@@ -101,9 +89,6 @@ export class DataProcessor {
     return record;
   }
 
-  /**
-   * Process all files from dummy_data folder
-   */
   async processAllDummyData(): Promise<{
     forms: ExtractionRecord[];
     emails: ExtractionRecord[];
@@ -111,7 +96,6 @@ export class DataProcessor {
   }> {
     const baseDir = path.join(process.cwd(), 'dummy_data');
 
-    // Process all forms
     const formsDir = path.join(baseDir, 'forms');
     const formFiles = await fs.readdir(formsDir);
     const forms = await Promise.all(
@@ -125,7 +109,6 @@ export class DataProcessor {
         )
     );
 
-    // Process all emails
     const emailsDir = path.join(baseDir, 'emails');
     const emailFiles = await fs.readdir(emailsDir);
     const emails = await Promise.all(
@@ -139,7 +122,6 @@ export class DataProcessor {
         )
     );
 
-    // Process all invoices
     const invoicesDir = path.join(baseDir, 'invoices');
     const invoiceFiles = await fs.readdir(invoicesDir);
     const invoices = await Promise.all(
@@ -157,13 +139,9 @@ export class DataProcessor {
   }
 }
 
-/**
- * Generate unique ID for extraction records
- */
 function generateId(): string {
   return `ext_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
-// Singleton instance
 export const dataProcessor = new DataProcessor();
 
