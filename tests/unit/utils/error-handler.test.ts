@@ -15,7 +15,6 @@ describe('ErrorHandler', () => {
     });
 
     expect(appError.category).toBe(ErrorCategory.EXTRACTION);
-    // Error message contains "parse" so it returns the parse-specific message
     expect(appError.userMessage).toContain('ανάγνωσης');
   });
 
@@ -28,7 +27,6 @@ describe('ErrorHandler', () => {
     });
 
     expect(appError.category).toBe(ErrorCategory.STORAGE);
-    // Error message contains "not found" so it returns the not found message
     expect(appError.userMessage).toContain('δεν βρέθηκε');
   });
 
@@ -95,26 +93,22 @@ describe('ErrorHandler', () => {
   });
 
   it('should handle export errors with auth messages', () => {
-    // Error message must contain lowercase "auth" to match the condition
     const error = new Error('auth failed');
     const appError = errorHandler.handle({
       error,
       category: ErrorCategory.EXPORT,
     });
 
-    // Error message contains "auth" so it should match the auth condition
     expect(appError.userMessage.toLowerCase()).toContain('εξουσιοδότησης');
   });
 
   it('should handle export errors with permission messages', () => {
-    // Error message must contain "permission" to match the condition
     const error = new Error('permission denied');
     const appError = errorHandler.handle({
       error,
       category: ErrorCategory.EXPORT,
     });
 
-    // Error message contains "permission" so it should match the permission condition
     expect(appError.userMessage.toLowerCase()).toContain('δικαιώματα');
   });
 
@@ -139,14 +133,12 @@ describe('ErrorHandler', () => {
   });
 
   it('should handle validation errors for required fields', () => {
-    // Error message must contain "required" to match the condition
     const error = new Error('required field missing');
     const appError = errorHandler.handle({
       error,
       category: ErrorCategory.VALIDATION,
     });
 
-    // Error message contains "required" so it should match the required condition
     expect(appError.userMessage.toLowerCase()).toContain('απαιτούμενα');
   });
 

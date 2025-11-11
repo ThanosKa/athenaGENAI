@@ -4,14 +4,11 @@ import { ExtractionStatus, SourceType } from "@/types/data";
 
 test.describe("Dashboard Workflow", () => {
   test.beforeEach(async ({ page }) => {
-    // Track if POST was called to simulate "stored" records
     let postProcessed = false;
 
-    // Create 25 mock records to match the summary (5 forms + 10 emails + 10 invoices)
     const createMockRecords = (): any[] => {
       const mockRecords: any[] = [];
 
-      // 5 form records
       for (let i = 1; i <= 5; i++) {
         mockRecords.push({
           id: `form-record-${i}`,
@@ -33,7 +30,6 @@ test.describe("Dashboard Workflow", () => {
         });
       }
 
-      // 10 email records
       for (let i = 1; i <= 10; i++) {
         mockRecords.push({
           id: `email-record-${i}`,
@@ -58,7 +54,6 @@ test.describe("Dashboard Workflow", () => {
         });
       }
 
-      // 10 invoice records
       for (let i = 1; i <= 10; i++) {
         mockRecords.push({
           id: `invoice-record-${i}`,
@@ -83,15 +78,12 @@ test.describe("Dashboard Workflow", () => {
       return mockRecords;
     };
 
-    // Store records in a variable accessible to both routes
     let allRecords: any[] = [];
 
-    // Mock API responses
     await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "POST") {
-        postProcessed = true; // Mark that POST was called
-        allRecords = createMockRecords(); // Generate records after POST
-        // Mock successful processing
+        postProcessed = true;
+        allRecords = createMockRecords();
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -107,7 +99,6 @@ test.describe("Dashboard Workflow", () => {
           }),
         });
       } else {
-        // GET request - return mock records only if POST was called
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
         const sourceFilter = url.searchParams.get("sourceType");
@@ -178,7 +169,6 @@ test.describe("Dashboard Workflow", () => {
       const record = allRecords.find((r) => r.id === body.id);
 
       if (body.action === "edit") {
-        // Update record with edited data
         if (record) {
           record.status = ExtractionStatus.EDITED;
           record.data = { ...record.data, ...body.updatedData };
@@ -192,7 +182,6 @@ test.describe("Dashboard Workflow", () => {
           }),
         });
       } else if (body.action === "approve") {
-        // Update record status to approved
         if (record) {
           record.status = ExtractionStatus.APPROVED;
         }
@@ -204,7 +193,6 @@ test.describe("Dashboard Workflow", () => {
           }),
         });
       } else if (body.action === "reject") {
-        // Update record status to rejected
         if (record) {
           record.status = ExtractionStatus.REJECTED;
         }
@@ -246,20 +234,16 @@ test.describe("Dashboard Workflow", () => {
   test("should process data and verify 25 records appear with correct statistics", async ({
     page,
   }) => {
-    // Click process data button
     const processBtn = page.locator('[data-testid="process-data-btn"]');
     await expect(processBtn).toBeVisible({ timeout: 10000 });
     await processBtn.click();
 
-    // Wait for network requests to complete
     await page.waitForLoadState("networkidle");
 
-    // Wait for success toast (sonner toast appears)
     await expect(
       page.getByText(/Successfully processed.*records/i)
     ).toBeVisible({ timeout: 10000 });
 
-    // Verify statistics update
     const statTotal = page.locator('[data-testid="stat-total"]');
     await expect(statTotal).toBeVisible({ timeout: 10000 });
     await expect(statTotal).toContainText("25", { timeout: 5000 });
@@ -267,7 +251,6 @@ test.describe("Dashboard Workflow", () => {
     const statPending = page.locator('[data-testid="stat-pending"]');
     await expect(statPending).toBeVisible({ timeout: 10000 });
 
-    // Verify extraction list appears
     const extractionList = page.locator('[data-testid="extraction-list"]');
     await expect(extractionList).toBeVisible({ timeout: 10000 });
   });
@@ -275,7 +258,6 @@ test.describe("Dashboard Workflow", () => {
   test("should handle API failure during processing and display error toast", async ({
     page,
   }) => {
-    // Override route to return error
     await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "POST") {
         await route.fulfill({
@@ -307,10 +289,8 @@ test.describe("Dashboard Workflow", () => {
       }
     });
 
-    // Click process data button
     await page.locator('[data-testid="process-data-btn"]').click();
 
-    // Verify error toast appears
     await expect(page.getByText(/Failed to process/i)).toBeVisible({
       timeout: 10000,
     });

@@ -50,7 +50,6 @@ describe('Logger', () => {
   });
 
   it('should log debug level messages', () => {
-    // Set logger to DEBUG level to ensure debug messages are logged
     logger.setMinLevel(LogLevel.DEBUG);
     const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
 
@@ -123,7 +122,6 @@ describe('Logger', () => {
   });
 
   it('should limit stored logs to maxLogs', () => {
-    // Create more logs than maxLogs (1000)
     for (let i = 0; i < 1001; i++) {
       logger.info(`Message ${i}`);
     }

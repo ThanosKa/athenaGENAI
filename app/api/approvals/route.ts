@@ -10,7 +10,6 @@ export async function POST(request: NextRequest) {
     const { action, id, ids, approvedBy, rejectedBy, reason, updatedData, editedBy } =
       body;
 
-    // Validate required fields
     if (!action) {
       return NextResponse.json(
         {

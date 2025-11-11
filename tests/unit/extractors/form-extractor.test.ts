@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { extractFormData } from '@/lib/extractors/form-extractor';
 
-// Mock cheerio BEFORE importing
 vi.mock('cheerio', async () => {
   const actual = await vi.importActual('cheerio');
   return actual;
@@ -191,7 +190,6 @@ describe('extractFormData', () => {
   });
 
   it('should handle parsing errors', () => {
-    // Pass invalid HTML that might cause cheerio to fail
     const htmlContent = null as unknown as string;
 
     const result = extractFormData({

@@ -1,4 +1,3 @@
-// Mock data helpers for tests
 import {
   ExtractionRecord,
   ExtractionStatus,

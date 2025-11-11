@@ -80,7 +80,7 @@ describe('EditService', () => {
     const result = editService.edit({
       id: 'validate-1',
       updatedData: {
-        email: 'invalid-email-format', // Invalid email
+        email: 'invalid-email-format',
       },
     });
 
@@ -120,7 +120,6 @@ describe('EditService', () => {
     expect(result.success).toBe(true);
     const updated = storageService.getRecord('partial-1');
     expect(updated?.data.company).toBe('Updated Company');
-    // Other fields should remain unchanged
     expect(updated?.data.fullName).toBe('Test User');
     expect(updated?.data.email).toBe('test@example.com');
   });

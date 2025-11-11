@@ -4,7 +4,6 @@ import { storageService } from "@/lib/services/storage";
 import { promises as fs, type PathLike } from "fs";
 import path from "path";
 
-// Mock extractors BEFORE importing
 vi.mock("@/lib/extractors/form-extractor", () => ({
   extractFormData: vi.fn(),
 }));
@@ -22,7 +21,6 @@ import { extractEmailData } from "@/lib/extractors/email-extractor";
 import { extractInvoiceData } from "@/lib/extractors/invoice-extractor";
 import { ExtractionStatus, SourceType } from "@/types/data";
 
-// Mock fs module
 vi.mock("fs", () => ({
   promises: {
     readFile: vi.fn(),
@@ -31,8 +29,6 @@ vi.mock("fs", () => ({
 }));
 
 describe("DataProcessor", () => {
-  // Helper function to create readdir mock implementation
-  // Matches the overload: readdir(path: PathLike): Promise<string[]>
   const createReaddirMock = (dir: PathLike): Promise<string[]> => {
     const dirStr = String(dir);
     if (dirStr.includes("forms")) {
@@ -164,15 +160,12 @@ describe("DataProcessor", () => {
   });
 
   it("should process all dummy data files", async () => {
-    // Mock file system - use the helper function
-    // Access the mock directly since fs.readdir is already a vi.fn()
     (fs.readdir as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       createReaddirMock
     );
 
     vi.mocked(fs.readFile).mockResolvedValue("file content");
 
-    // Mock extractors
     vi.mocked(extractFormData).mockReturnValue({
       success: true,
       data: {
@@ -226,15 +219,12 @@ describe("DataProcessor", () => {
   });
 
   it("should handle mixed success/failure scenarios", async () => {
-    // Mock file system to return only form files
-    // Access the mock directly since fs.readdir is already a vi.fn()
     (fs.readdir as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       (dir: PathLike): Promise<string[]> => {
         const dirStr = String(dir);
         if (dirStr.includes("forms")) {
           return Promise.resolve(["form_1.html", "form_2.html"]);
         }
-        // Return empty arrays for emails and invoices
         return Promise.resolve([]);
       }
     );

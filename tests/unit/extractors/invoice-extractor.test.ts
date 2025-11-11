@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { extractInvoiceData } from "@/lib/extractors/invoice-extractor";
 
-// Mock cheerio BEFORE importing
 vi.mock("cheerio", async () => {
   const actual = await vi.importActual("cheerio");
   return actual;
@@ -104,7 +103,6 @@ describe("extractInvoiceData", () => {
     });
 
     expect(result.success).toBe(true);
-    // VAT should be 240 (1000 * 0.24), but we have 250, so warning expected
     expect(result.warnings?.some((w) => w.includes("VAT calculation"))).toBe(
       true
     );
@@ -136,7 +134,6 @@ describe("extractInvoiceData", () => {
     });
 
     expect(result.success).toBe(true);
-    // Customer name extraction depends on HTML structure - check if it's extracted or empty
     if (result.data?.customerName) {
       expect(result.data.customerName).toBe("Customer Name");
     }
@@ -264,7 +261,6 @@ describe("extractInvoiceData", () => {
     });
 
     expect(result.success).toBe(true);
-    // Payment method regex captures text until next label, so we check it contains the expected value
     expect(result.data?.paymentMethod).toContain("Μετρητά");
   });
 

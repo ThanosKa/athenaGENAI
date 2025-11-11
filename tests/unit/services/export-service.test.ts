@@ -9,7 +9,6 @@ import {
   ExtractedFormData,
 } from '@/types/data';
 
-// Mock Google Sheets client
 vi.mock('@/lib/integrations/google-sheets', () => ({
   googleSheetsClient: {
     initialize: vi.fn().mockResolvedValue(undefined),
@@ -21,7 +20,6 @@ vi.mock('@/lib/integrations/google-sheets', () => ({
   },
 }));
 
-// Mock logger
 vi.mock('@/lib/utils/logger', () => ({
   logger: {
     info: vi.fn(),
@@ -29,7 +27,6 @@ vi.mock('@/lib/utils/logger', () => ({
   },
 }));
 
-// Mock error handler
 vi.mock('@/lib/utils/error-handler', () => ({
   errorHandler: {
     handle: vi.fn().mockReturnValue({
@@ -111,7 +108,6 @@ describe('ExportService', () => {
     const result = await exportService.exportApprovedRecords();
 
     expect(result.success).toBe(true);
-    // Only approved record should be exported
     const exported = storageService.getRecord('approved-1');
     expect(exported?.status).toBe(ExtractionStatus.EXPORTED);
   });
@@ -186,7 +182,6 @@ describe('ExportService', () => {
     });
 
     expect(result.success).toBe(true);
-    // Only approved record should be exported
     const exported = storageService.getRecord('approved-id');
     expect(exported?.status).toBe(ExtractionStatus.EXPORTED);
   });

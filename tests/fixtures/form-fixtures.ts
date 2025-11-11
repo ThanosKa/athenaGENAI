@@ -1,4 +1,3 @@
-// Test fixtures for form extractor tests
 export const sampleFormHTML = `
 <!DOCTYPE html>
 <html lang="el">

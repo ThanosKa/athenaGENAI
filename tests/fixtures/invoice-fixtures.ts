@@ -1,4 +1,3 @@
-// Test fixtures for invoice extractor tests
 export const sampleInvoiceHTML = `
 <!DOCTYPE html>
 <html lang="el">

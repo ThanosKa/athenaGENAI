@@ -3,10 +3,13 @@ import {
   ExtractedFormData,
   ExtractedEmailData,
   ExtractedInvoiceData,
-} from '@/types/data';
-import { storageService } from '@/lib/services/storage';
+} from "@/types/data";
+import { storageService } from "@/lib/services/storage";
 
-type EditableData = ExtractedFormData | ExtractedEmailData | ExtractedInvoiceData;
+type EditableData =
+  | ExtractedFormData
+  | ExtractedEmailData
+  | ExtractedInvoiceData;
 
 export class EditService {
   edit({
@@ -20,7 +23,7 @@ export class EditService {
   }): { success: boolean; error?: string } {
     const record = storageService.getRecord(id);
     if (!record) {
-      return { success: false, error: 'Record not found' };
+      return { success: false, error: "Record not found" };
     }
 
     if (
@@ -44,12 +47,12 @@ export class EditService {
     const updated = storageService.updateRecord(id, {
       data: mergedData,
       status: ExtractionStatus.EDITED,
-      editedBy: editedBy || 'system',
+      editedBy: editedBy || "system",
       editedAt: new Date(),
     });
 
     if (!updated) {
-      return { success: false, error: 'Failed to update record' };
+      return { success: false, error: "Failed to update record" };
     }
 
     return { success: true };
@@ -66,33 +69,30 @@ export class EditService {
   }): { valid: boolean; error?: string } {
     const record = storageService.getRecord(recordId);
     if (!record) {
-      return { valid: false, error: 'Record not found' };
+      return { valid: false, error: "Record not found" };
     }
 
-    // Email validation
-    if (fieldName === 'email' && typeof value === 'string') {
+    if (fieldName === "email" && typeof value === "string") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) {
-        return { valid: false, error: 'Invalid email format' };
+        return { valid: false, error: "Invalid email format" };
       }
     }
 
-    // Phone validation (basic)
-    if (fieldName === 'phone' && typeof value === 'string') {
+    if (fieldName === "phone" && typeof value === "string") {
       if (value.length < 5) {
-        return { valid: false, error: 'Phone number too short' };
+        return { valid: false, error: "Phone number too short" };
       }
     }
 
-    // Numeric fields validation
     if (
-      (fieldName === 'netAmount' ||
-        fieldName === 'vatAmount' ||
-        fieldName === 'totalAmount') &&
-      typeof value === 'number'
+      (fieldName === "netAmount" ||
+        fieldName === "vatAmount" ||
+        fieldName === "totalAmount") &&
+      typeof value === "number"
     ) {
       if (value < 0) {
-        return { valid: false, error: 'Amount cannot be negative' };
+        return { valid: false, error: "Amount cannot be negative" };
       }
     }
 
@@ -104,38 +104,40 @@ function validateData(
   updatedData: Partial<EditableData>,
   originalData: EditableData
 ): string | undefined {
-  // Basic type checking - ensure we're not changing types
   for (const [key, value] of Object.entries(updatedData)) {
-    const originalValue = (originalData as unknown as Record<string, unknown>)[key];
+    const originalValue = (originalData as unknown as Record<string, unknown>)[
+      key
+    ];
     if (originalValue !== undefined && typeof originalValue !== typeof value) {
       return `Type mismatch for field ${key}: expected ${typeof originalValue}, got ${typeof value}`;
     }
   }
 
-  // Email validation
-  if ('email' in updatedData && updatedData.email) {
+  if ("email" in updatedData && updatedData.email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(updatedData.email as string)) {
-      return 'Invalid email format';
+      return "Invalid email format";
     }
   }
 
-  // Numeric validations for invoice data
-  if ('netAmount' in updatedData && typeof updatedData.netAmount === 'number') {
+  if ("netAmount" in updatedData && typeof updatedData.netAmount === "number") {
     if (updatedData.netAmount < 0) {
-      return 'Net amount cannot be negative';
+      return "Net amount cannot be negative";
     }
   }
 
-  if ('vatAmount' in updatedData && typeof updatedData.vatAmount === 'number') {
+  if ("vatAmount" in updatedData && typeof updatedData.vatAmount === "number") {
     if (updatedData.vatAmount < 0) {
-      return 'VAT amount cannot be negative';
+      return "VAT amount cannot be negative";
     }
   }
 
-  if ('totalAmount' in updatedData && typeof updatedData.totalAmount === 'number') {
+  if (
+    "totalAmount" in updatedData &&
+    typeof updatedData.totalAmount === "number"
+  ) {
     if (updatedData.totalAmount < 0) {
-      return 'Total amount cannot be negative';
+      return "Total amount cannot be negative";
     }
   }
 
@@ -143,4 +145,3 @@ function validateData(
 }
 
 export const editService = new EditService();
-

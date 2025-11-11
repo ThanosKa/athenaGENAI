@@ -8,7 +8,6 @@ import {
   ExtractedInvoiceData,
 } from "@/types/data";
 
-// Type guard helpers for safe property access
 function isFormData(
   data: ExtractedFormData | ExtractedEmailData | ExtractedInvoiceData,
   sourceType: SourceType
@@ -32,7 +31,6 @@ function isInvoiceData(
 
 test.describe("Filters and Search", () => {
   test.beforeEach(async ({ page }) => {
-    // Create mock records with different statuses and source types - always available for testing
     const mockRecords = [
       {
         id: "record-1",
@@ -95,7 +93,6 @@ test.describe("Filters and Search", () => {
 
     await page.route("/api/extractions**", async (route) => {
       if (route.request().method() === "POST") {
-        // Mock successful processing
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -111,7 +108,6 @@ test.describe("Filters and Search", () => {
           }),
         });
       } else {
-        // GET request - return mock records with filters applied
         const url = new URL(route.request().url());
         const statusFilter = url.searchParams.get("status");
         const sourceFilter = url.searchParams.get("sourceType");
@@ -119,30 +115,25 @@ test.describe("Filters and Search", () => {
 
         let filteredRecords = [...mockRecords];
 
-        // Apply status filter
         if (statusFilter && statusFilter !== "all") {
           filteredRecords = filteredRecords.filter(
             (r) => r.status === statusFilter
           );
         }
 
-        // Apply source type filter
         if (sourceFilter && sourceFilter !== "all") {
           filteredRecords = filteredRecords.filter(
             (r) => r.sourceType === sourceFilter
           );
         }
 
-        // Apply search filter
         if (searchQuery) {
           const query = searchQuery.toLowerCase();
           filteredRecords = filteredRecords.filter((r) => {
-            // Search in source file name
             if (r.sourceFile.toLowerCase().includes(query)) {
               return true;
             }
 
-            // Search in form data (fullName, email)
             if (isFormData(r.data, r.sourceType)) {
               return (
                 r.data.fullName.toLowerCase().includes(query) ||
@@ -150,7 +141,6 @@ test.describe("Filters and Search", () => {
               );
             }
 
-            // Search in email data (fullName, email - both optional)
             if (isEmailData(r.data, r.sourceType)) {
               return (
                 r.data.fullName?.toLowerCase().includes(query) ||
@@ -158,7 +148,6 @@ test.describe("Filters and Search", () => {
               );
             }
 
-            // Search in invoice data (invoiceNumber)
             if (isInvoiceData(r.data, r.sourceType)) {
               return r.data.invoiceNumber.toLowerCase().includes(query);
             }
@@ -210,7 +199,6 @@ test.describe("Filters and Search", () => {
 
     await page.goto("/");
 
-    // Process data first
     await page.locator('[data-testid="process-data-btn"]').click();
     await page.waitForLoadState("networkidle");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible({
@@ -221,21 +209,15 @@ test.describe("Filters and Search", () => {
   test("should filter records by status showing only pending records", async ({
     page,
   }) => {
-    // Click status filter
     await page.locator('[data-testid="filter-status-select"]').click();
-    await page.waitForTimeout(300); // Wait for dropdown portal to render
-
-    // Select Pending
+    await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'Pending' }).click();
 
-    // Wait for filtered results
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Verify only pending records are shown (2 records: record-1 and record-3)
     const rows = page.locator('[data-testid^="record-row-"]');
     await expect(rows).toHaveCount(2);
 
-    // Verify both have pending status
     await expect(
       page.locator('[data-testid="status-badge-record-1"]')
     ).toContainText("Pending");
@@ -247,21 +229,15 @@ test.describe("Filters and Search", () => {
   test("should filter records by source type showing only forms", async ({
     page,
   }) => {
-    // Click source type filter
     await page.locator('[data-testid="filter-source-select"]').click();
-    await page.waitForTimeout(300); // Wait for dropdown portal to render
-
-    // Select Forms
+    await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'Forms' }).click();
 
-    // Wait for filtered results
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Verify only form records are shown (1 record: record-1)
     const rows = page.locator('[data-testid^="record-row-"]');
     await expect(rows).toHaveCount(1);
 
-    // Verify it's the form record
     await expect(
       page.locator('[data-testid="record-row-record-1"]')
     ).toBeVisible();
@@ -270,22 +246,17 @@ test.describe("Filters and Search", () => {
   test("should search records by query and filter results", async ({
     page,
   }) => {
-    // Type in search input
     await page.locator('[data-testid="search-input"]').fill("John");
 
-    // Wait for filtered results
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Verify only matching record is shown
     const rows = page.locator('[data-testid^="record-row-"]');
     await expect(rows).toHaveCount(1);
 
-    // Verify it's the correct record
     await expect(
       page.locator('[data-testid="record-row-record-1"]')
     ).toBeVisible();
 
-    // Clear search and verify all records appear
     await page.locator('[data-testid="search-input"]').clear();
     await expect(rows).toHaveCount(3);
   });
@@ -293,23 +264,18 @@ test.describe("Filters and Search", () => {
   test("should combine filters and search to narrow results", async ({
     page,
   }) => {
-    // Set status filter to Pending
     await page.locator('[data-testid="filter-status-select"]').click();
-    await page.waitForTimeout(300); // Wait for dropdown portal to render
+    await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'Pending' }).click();
 
-    // Set source filter to Form
     await page.locator('[data-testid="filter-source-select"]').click();
-    await page.waitForTimeout(300); // Wait for dropdown portal to render
+    await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'Forms' }).click();
 
-    // Add search query
     await page.locator('[data-testid="search-input"]').fill("John");
 
-    // Wait for filtered results
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Should show only record-1 (pending form with "John")
     const rows = page.locator('[data-testid^="record-row-"]');
     await expect(rows).toHaveCount(1);
     await expect(
@@ -318,24 +284,19 @@ test.describe("Filters and Search", () => {
   });
 
   test('should reset filters when changing back to "All"', async ({ page }) => {
-    // Apply filters
     await page.locator('[data-testid="filter-status-select"]').click();
-    await page.waitForTimeout(300); // Wait for dropdown portal to render
+    await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'Pending' }).click();
 
-    // Verify filtered results
     let rows = page.locator('[data-testid^="record-row-"]');
     await expect(rows).toHaveCount(2);
 
-    // Reset to "All"
     await page.locator('[data-testid="filter-status-select"]').click();
-    await page.waitForTimeout(300); // Wait for dropdown portal to render
+    await page.waitForTimeout(300);
     await page.getByRole('option', { name: 'All' }).click();
 
-    // Wait for filtered results
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Verify all records are shown again
     await expect(rows).toHaveCount(3);
   });
 });

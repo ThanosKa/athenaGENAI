@@ -1,5 +1,5 @@
-import { simpleParser } from 'mailparser';
-import { ExtractionResult, ExtractedEmailData } from '@/types/data';
+import { simpleParser } from "mailparser";
+import { ExtractionResult, ExtractedEmailData } from "@/types/data";
 
 /**
  * Extracts data from .eml email files
@@ -18,24 +18,26 @@ export async function extractEmailData({
   try {
     const parsed = await simpleParser(emlContent);
 
-    const from = parsed.from?.text || '';
-    const fromEmail = parsed.from?.value[0]?.address || '';
-    const to = Array.isArray(parsed.to) 
-      ? parsed.to.map(addr => addr.text || '').join(', ')
-      : parsed.to?.text || '';
-    const subject = parsed.subject || '';
+    const from = parsed.from?.text || "";
+    const fromEmail = parsed.from?.value[0]?.address || "";
+    const to = Array.isArray(parsed.to)
+      ? parsed.to.map((addr) => addr.text || "").join(", ")
+      : parsed.to?.text || "";
+    const subject = parsed.subject || "";
     const date = parsed.date?.toISOString() || new Date().toISOString();
-    const bodyText = parsed.text || '';
+    const bodyText = parsed.text || "";
 
     const isInvoiceNotification = detectInvoiceNotification(subject, bodyText);
-    
+
     let extractedData: ExtractedEmailData = {
       from,
       fromEmail,
       to,
       subject,
       date,
-      emailType: isInvoiceNotification ? 'invoice_notification' : 'client_inquiry',
+      emailType: isInvoiceNotification
+        ? "invoice_notification"
+        : "client_inquiry",
       bodyText,
     };
 
@@ -44,20 +46,22 @@ export async function extractEmailData({
       if (invoiceRef) {
         extractedData.invoiceReference = invoiceRef;
       } else {
-        warnings.push('Invoice notification detected but no invoice reference found');
+        warnings.push(
+          "Invoice notification detected but no invoice reference found"
+        );
       }
     } else {
       const contactInfo = extractContactInfo(bodyText, from);
       extractedData = { ...extractedData, ...contactInfo };
 
       if (!contactInfo.fullName) {
-        warnings.push('Could not extract full name from email body');
+        warnings.push("Could not extract full name from email body");
       }
       if (!contactInfo.email) {
-        warnings.push('Could not extract email address from email body');
+        warnings.push("Could not extract email address from email body");
       }
       if (!contactInfo.company) {
-        warnings.push('Could not extract company name from email body');
+        warnings.push("Could not extract company name from email body");
       }
     }
 
@@ -69,7 +73,9 @@ export async function extractEmailData({
   } catch (error) {
     return {
       success: false,
-      error: `Failed to parse email from ${sourceFile}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      error: `Failed to parse email from ${sourceFile}: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
     };
   }
 }
@@ -79,29 +85,32 @@ export async function extractEmailData({
  */
 function detectInvoiceNotification(subject: string, body: string): boolean {
   const invoiceKeywords = [
-    'τιμολόγιο',
-    'invoice',
-    'TF-2024-',
-    'αριθμός τιμολογίου',
-    'invoice number',
+    "τιμολόγιο",
+    "invoice",
+    "TF-2024-",
+    "αριθμός τιμολογίου",
+    "invoice number",
   ];
 
   const subjectLower = subject.toLowerCase();
   const bodyLower = body.toLowerCase();
 
-  return invoiceKeywords.some(keyword => 
-    subjectLower.includes(keyword.toLowerCase()) || 
-    bodyLower.includes(keyword.toLowerCase())
+  return invoiceKeywords.some(
+    (keyword) =>
+      subjectLower.includes(keyword.toLowerCase()) ||
+      bodyLower.includes(keyword.toLowerCase())
   );
 }
 
 /**
  * Extracts invoice reference number from email
  */
-function extractInvoiceReference(subject: string, body: string): string | undefined {
-  // Pattern for invoice numbers like TF-2024-001, TF-2024-002, etc.
+function extractInvoiceReference(
+  subject: string,
+  body: string
+): string | undefined {
   const invoicePattern = /TF-\d{4}-\d{3}/g;
-  
+
   const subjectMatch = subject.match(invoicePattern);
   if (subjectMatch) {
     return subjectMatch[0];
@@ -122,42 +131,46 @@ function extractInvoiceReference(subject: string, body: string): string | undefi
 function extractContactInfo(
   bodyText: string,
   fromName: string
-): Pick<ExtractedEmailData, 'fullName' | 'email' | 'phone' | 'company' | 'position'> {
-  const result: Pick<ExtractedEmailData, 'fullName' | 'email' | 'phone' | 'company' | 'position'> = {};
+): Pick<
+  ExtractedEmailData,
+  "fullName" | "email" | "phone" | "company" | "position"
+> {
+  const result: Pick<
+    ExtractedEmailData,
+    "fullName" | "email" | "phone" | "company" | "position"
+  > = {};
 
-  // Extract full name
-  const namePattern = /(?:Όνομα|Name|Είμαι ο|Είμαι η|I am)[\s:]+([Α-Ωα-ωΆ-ώA-Za-z\s]+?)(?:\n|$|\.)/i;
+  const namePattern =
+    /(?:Όνομα|Name|Είμαι ο|Είμαι η|I am)[\s:]+([Α-Ωα-ωΆ-ώA-Za-z\s]+?)(?:\n|$|\.)/i;
   const nameMatch = bodyText.match(namePattern);
   if (nameMatch) {
     result.fullName = nameMatch[1].trim();
   } else {
-    // Fallback to from name
-    result.fullName = fromName.replace(/<.*?>/, '').trim();
+    result.fullName = fromName.replace(/<.*?>/, "").trim();
   }
 
-  // Extract email
   const emailPattern = /(?:Email|E-mail)[\s:]+([^\s@]+@[^\s@]+\.[^\s@]+)/i;
   const emailMatch = bodyText.match(emailPattern);
   if (emailMatch) {
     result.email = emailMatch[1].trim();
   }
 
-  // Extract phone
-  const phonePattern = /(?:Τηλέφωνο|Τηλ\.|Phone|Tel\.)[\s:]+([0-9\-\s\+\(\)]+)/i;
+  const phonePattern =
+    /(?:Τηλέφωνο|Τηλ\.|Phone|Tel\.)[\s:]+([0-9\-\s\+\(\)]+)/i;
   const phoneMatch = bodyText.match(phonePattern);
   if (phoneMatch) {
     result.phone = phoneMatch[1].trim();
   }
 
-  // Extract company
-  const companyPattern = /(?:Εταιρεία|Εταιρία|Company)[\s:]+([Α-Ωα-ωΆ-ώA-Za-z0-9\s&\-\.]+?)(?:\n|$)/i;
+  const companyPattern =
+    /(?:Εταιρεία|Εταιρία|Company)[\s:]+([Α-Ωα-ωΆ-ώA-Za-z0-9\s&\-\.]+?)(?:\n|$)/i;
   const companyMatch = bodyText.match(companyPattern);
   if (companyMatch) {
     result.company = companyMatch[1].trim();
   }
 
-  // Extract position/title
-  const positionPattern = /(?:Θέση|Position|Title)[\s:]+([Α-Ωα-ωΆ-ώA-Za-z\s]+?)(?:\n|$)/i;
+  const positionPattern =
+    /(?:Θέση|Position|Title)[\s:]+([Α-Ωα-ωΆ-ώA-Za-z\s]+?)(?:\n|$)/i;
   const positionMatch = bodyText.match(positionPattern);
   if (positionMatch) {
     result.position = positionMatch[1].trim();
@@ -165,4 +178,3 @@ function extractContactInfo(
 
   return result;
 }
-

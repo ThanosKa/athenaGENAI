@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { extractEmailData } from "@/lib/extractors/email-extractor";
 
-// Mock mailparser BEFORE importing the module
 vi.mock("mailparser", () => ({
   simpleParser: vi.fn(),
 }));
@@ -55,7 +54,6 @@ describe("extractEmailData", () => {
     expect(result.data).toBeDefined();
     expect(result.data?.fullName).toBe("Σπύρος Μιχαήλ");
     expect(result.data?.email).toBe("spyros.michail@techcorp.gr");
-    // Phone extraction may include trailing characters from the list format
     expect(result.data?.phone).toContain("210-3344556");
     expect(result.data?.company).toBe("TechCorp AE");
     expect(result.data?.emailType).toBe("client_inquiry");

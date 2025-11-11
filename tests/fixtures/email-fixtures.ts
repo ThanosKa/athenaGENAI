@@ -1,4 +1,3 @@
-// Test fixtures for email extractor tests
 export const sampleEmailContent = `From: Test User <test@example.com>
 To: info@techflow-solutions.gr
 Subject: Test Inquiry

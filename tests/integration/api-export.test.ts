@@ -5,7 +5,6 @@ import { createMockFormRecord } from "@/tests/fixtures/mock-data";
 
 test.describe("API Export", () => {
   test.beforeEach(async ({ page }) => {
-    // Set up mock approved records for export
     const approvedRecord1 = createMockFormRecord({
       id: "record-approved-1",
       status: ExtractionStatus.APPROVED,
@@ -19,7 +18,6 @@ test.describe("API Export", () => {
       status: ExtractionStatus.PENDING,
     });
 
-    // Mock /api/extractions GET
     await page.route("/api/extractions", async (route) => {
       if (route.request().method() === "GET") {
         const url = new URL(route.request().url());
@@ -71,7 +69,6 @@ test.describe("API Export", () => {
   test("should return export status information", async ({ page }) => {
     let exportStatusRequest: any = null;
 
-    // Mock /api/export GET
     await page.route("/api/export", async (route) => {
       if (route.request().method() === "GET") {
         exportStatusRequest = route.request();
@@ -90,14 +87,12 @@ test.describe("API Export", () => {
 
     await page.goto("/");
 
-    // Trigger GET request via API call
     await page.evaluate(() => {
       fetch("/api/export");
     });
 
     await page.waitForTimeout(500);
 
-    // Verify GET request was made
     expect(exportStatusRequest).toBeTruthy();
     expect(exportStatusRequest.method()).toBe("GET");
   });
@@ -108,11 +103,10 @@ test.describe("API Export", () => {
     let exportRequestData: any = null;
     let hasExported = false;
 
-    // Mock /api/export POST
     await page.route("/api/export", async (route) => {
       if (route.request().method() === "POST") {
         exportRequestData = await route.request().postDataJSON();
-        hasExported = true; // Set flag when export happens
+        hasExported = true;
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -127,7 +121,6 @@ test.describe("API Export", () => {
       }
     });
 
-    // Mock updated records after export (status changed to exported)
     await page.route("/api/extractions", async (route) => {
       if (route.request().method() === "GET") {
         const pendingRecord = createMockFormRecord({
@@ -137,7 +130,6 @@ test.describe("API Export", () => {
 
         let record1, record2;
         if (hasExported) {
-          // After export: return EXPORTED records
           record1 = createMockFormRecord({
             id: "record-approved-1",
             status: ExtractionStatus.EXPORTED,
@@ -147,7 +139,6 @@ test.describe("API Export", () => {
             status: ExtractionStatus.EXPORTED,
           });
         } else {
-          // Initially: return APPROVED records
           record1 = createMockFormRecord({
             id: "record-approved-1",
             status: ExtractionStatus.APPROVED,
@@ -179,31 +170,22 @@ test.describe("API Export", () => {
       }
     });
 
-    // Navigate to ensure mocks are active
     await page.goto("/");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Verify export button is enabled (has approved records)
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeEnabled();
 
-    // Click export button
     await exportBtn.click();
 
-    // Verify API was called with correct data
     await expect.poll(() => exportRequestData).toBeTruthy();
     expect(exportRequestData.createNew).toBe(true);
 
-    // Verify success toast appears
     await expect(page.getByText(/exported successfully/i)).toBeVisible({
       timeout: 5000,
     });
 
-    // Wait for UI to refetch and update
     await page.waitForLoadState("networkidle");
-
-    // Verify export button might be disabled if no approved records remain
-    // (This depends on the UI logic after export)
   });
 
   test("should handle empty export when no approved records", async ({
@@ -211,7 +193,6 @@ test.describe("API Export", () => {
   }) => {
     let exportRequestData: any = null;
 
-    // Set up with no approved records
     const rejectedRecord = createMockFormRecord({
       id: "record-rejected",
       status: ExtractionStatus.REJECTED,
@@ -244,7 +225,6 @@ test.describe("API Export", () => {
       }
     });
 
-    // Mock /api/export POST to return error
     await page.route("/api/export", async (route) => {
       if (route.request().method() === "POST") {
         exportRequestData = await route.request().postDataJSON();
@@ -261,11 +241,9 @@ test.describe("API Export", () => {
     await page.goto("/");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Verify export button is disabled (no approved records)
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeDisabled();
 
-    // Try to trigger export via API (since button is disabled)
     await page.evaluate(() => {
       fetch("/api/export", {
         method: "POST",
@@ -276,7 +254,6 @@ test.describe("API Export", () => {
 
     await page.waitForTimeout(500);
 
-    // Verify error response
     expect(exportRequestData).toBeTruthy();
     expect(exportRequestData.createNew).toBe(true);
   });
@@ -284,7 +261,6 @@ test.describe("API Export", () => {
   test("should export specific records by IDs", async ({ page }) => {
     let exportRequestData: any = null;
 
-    // Mock /api/export POST
     await page.route("/api/export", async (route) => {
       if (route.request().method() === "POST") {
         exportRequestData = await route.request().postDataJSON();
@@ -305,7 +281,6 @@ test.describe("API Export", () => {
     await page.goto("/");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Trigger export with specific IDs via API
     await page.evaluate(() => {
       fetch("/api/export", {
         method: "POST",
@@ -319,7 +294,6 @@ test.describe("API Export", () => {
 
     await page.waitForTimeout(500);
 
-    // Verify API was called with correct data
     expect(exportRequestData).toBeTruthy();
     expect(exportRequestData.ids).toEqual([
       "record-approved-1",
@@ -331,7 +305,6 @@ test.describe("API Export", () => {
   test.skip("should verify export response format", async ({ page }) => {
     let exportRequestData: any = null;
 
-    // Mock /api/extractions GET to ensure approved records are returned
     await page.route("/api/extractions", async (route) => {
       if (route.request().method() === "GET") {
         const approvedRecord1 = createMockFormRecord({
@@ -364,7 +337,6 @@ test.describe("API Export", () => {
       }
     });
 
-    // Mock /api/export POST
     await page.route("/api/export", async (route) => {
       if (route.request().method() === "POST") {
         exportRequestData = await route.request().postDataJSON();
@@ -382,26 +354,20 @@ test.describe("API Export", () => {
       }
     });
 
-    // Navigate to ensure mocks are active
     await page.goto("/");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Verify export button is enabled (has approved records)
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeEnabled();
 
-    // Click export button
     await exportBtn.click();
 
-    // Verify API was called
     await expect.poll(() => exportRequestData).toBeTruthy();
 
-    // Verify success toast with proper format
     await expect(page.getByText(/exported successfully/i)).toBeVisible({
       timeout: 5000,
     });
 
-    // Wait for UI to refetch and update
     await page.waitForLoadState("networkidle");
   });
 
@@ -410,7 +376,6 @@ test.describe("API Export", () => {
   }) => {
     let exportRequestData: any = null;
 
-    // Mock /api/export POST
     await page.route("/api/export", async (route) => {
       if (route.request().method() === "POST") {
         exportRequestData = await route.request().postDataJSON();
@@ -430,7 +395,6 @@ test.describe("API Export", () => {
 
     await page.goto("/");
 
-    // Trigger export with existing spreadsheet ID via API
     await page.evaluate(() => {
       fetch("/api/export", {
         method: "POST",
@@ -444,7 +408,6 @@ test.describe("API Export", () => {
 
     await page.waitForTimeout(500);
 
-    // Verify API was called with correct data
     expect(exportRequestData).toBeTruthy();
     expect(exportRequestData.spreadsheetId).toBe("existing-spreadsheet-id");
     expect(exportRequestData.createNew).toBe(false);
@@ -456,11 +419,10 @@ test.describe("API Export", () => {
     let exportRequestData: any = null;
     let hasExported = false;
 
-    // Mock /api/export POST
     await page.route("/api/export", async (route) => {
       if (route.request().method() === "POST") {
         exportRequestData = await route.request().postDataJSON();
-        hasExported = true; // Set flag when export happens
+        hasExported = true;
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
@@ -475,7 +437,6 @@ test.describe("API Export", () => {
       }
     });
 
-    // Mock /api/extractions GET with state tracking
     await page.route("/api/extractions", async (route) => {
       if (route.request().method() === "GET") {
         const url = new URL(route.request().url());
@@ -483,7 +444,6 @@ test.describe("API Export", () => {
 
         let records;
         if (hasExported) {
-          // After export: return EXPORTED records
           const exportedRecord1 = createMockFormRecord({
             id: "record-approved-1",
             status: ExtractionStatus.EXPORTED,
@@ -498,7 +458,6 @@ test.describe("API Export", () => {
           });
           records = [exportedRecord1, exportedRecord2, pendingRecord];
         } else {
-          // Initially: return APPROVED records
           const approvedRecord1 = createMockFormRecord({
             id: "record-approved-1",
             status: ExtractionStatus.APPROVED,
@@ -547,34 +506,26 @@ test.describe("API Export", () => {
       }
     });
 
-    // Navigate to ensure mocks are active
     await page.goto("/");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Verify export button is enabled (has approved records)
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeEnabled();
 
-    // Click export button
     await exportBtn.click();
 
-    // Verify API was called
     await expect.poll(() => exportRequestData).toBeTruthy();
 
-    // Verify success toast
     await expect(page.getByText(/exported successfully/i)).toBeVisible({
       timeout: 5000,
     });
 
-    // Wait for UI to refetch and update status to EXPORTED
     await page.waitForLoadState("networkidle");
 
-    // Verify status updated to exported
     await expect(
       page.locator('[data-testid="status-badge-record-approved-1"]')
     ).toContainText("Exported", { timeout: 10000 });
 
-    // Verify records reloaded (status updated)
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
   });
 
@@ -583,7 +534,6 @@ test.describe("API Export", () => {
   }) => {
     let exportRequestData: any = null;
 
-    // Mock /api/extractions GET to ensure approved records are returned
     await page.route("/api/extractions", async (route) => {
       if (route.request().method() === "GET") {
         const approvedRecord1 = createMockFormRecord({
@@ -616,7 +566,6 @@ test.describe("API Export", () => {
       }
     });
 
-    // Mock /api/export POST to return error
     await page.route("/api/export", async (route) => {
       if (route.request().method() === "POST") {
         exportRequestData = await route.request().postDataJSON();
@@ -633,17 +582,13 @@ test.describe("API Export", () => {
     await page.goto("/");
     await expect(page.locator('[data-testid="extraction-list"]')).toBeVisible();
 
-    // Verify export button is enabled (has approved records)
     const exportBtn = page.locator('[data-testid="export-btn"]');
     await expect(exportBtn).toBeEnabled();
 
-    // Click export button
     await exportBtn.click();
 
-    // Verify API was called
     await expect.poll(() => exportRequestData).toBeTruthy();
 
-    // Verify error toast appears
     await expect(page.getByText(/failed to export/i)).toBeVisible({
       timeout: 5000,
     });
